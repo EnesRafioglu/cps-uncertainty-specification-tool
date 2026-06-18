@@ -4,6 +4,8 @@ from core.form_parser import build_scenario_from_form
 
 
 app = Flask(__name__)
+app.json.sort_keys = False
+app.jinja_env.policies["json.dumps_kwargs"]["sort_keys"] = False
 
 
 @app.route("/", methods=["GET", "POST"])
