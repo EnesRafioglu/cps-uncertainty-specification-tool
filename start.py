@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-import json
 
 from core.form_parser import build_scenario_from_form
 

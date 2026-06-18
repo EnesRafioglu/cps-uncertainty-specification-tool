@@ -73,7 +73,6 @@ def build_nested_dict(paths):
             else:
                 split_dict[path[0]].append(path[1:])
         
-        
         for key, value in split_dict.items():
             ans[key] = build_nested_dict(value)
         
