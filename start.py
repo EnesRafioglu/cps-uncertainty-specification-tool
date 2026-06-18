@@ -9,12 +9,13 @@ app = Flask(__name__)
 @app.route("/", methods=["GET", "POST"])
 def index():
     submitted = request.method == "POST"
+    scenario = build_scenario_from_form(request.form) if submitted else None
     # Next step: pass scenario to validator and MATLAB generator.
 
     return render_template(
         "index.html",
         submitted=submitted,
-        scenario=None,
+        scenario=scenario,
     )
 
 
