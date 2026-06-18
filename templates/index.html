@@ -41,6 +41,11 @@
       <button type="submit">Submit scenario</button>
     </form>
 
+    {% if submitted %}
+      <h2>Parser output</h2>
+      <pre>{{ scenario | tojson(indent=2) }}</pre>
+    {% endif %}
+
     <template id="model-template">
       <fieldset data-model>
         <legend>Model</legend>
@@ -48,17 +53,17 @@
         <br>
         <label>
           Model ID
-          <input data-name="scenario.models[__model__].id">
+          <input data-name="scenario.models.__model__.id">
         </label>
         <br>
         <label>
           Name
-          <input data-name="scenario.models[__model__].name">
+          <input data-name="scenario.models.__model__.name">
         </label>
         <br>
         <label>
           Type
-          <select data-name="scenario.models[__model__].type">
+          <select data-name="scenario.models.__model__.type">
             <option value="SimulationModel">SimulationModel</option>
             <option value="RequirementModel">RequirementModel</option>
             <option value="CADGeometryModel">CADGeometryModel</option>
@@ -89,32 +94,32 @@
         <br>
         <label>
           Element ID
-          <input data-name="scenario.models[__model__].elements[__element__].id">
+          <input data-name="scenario.models.__model__.elements.__element__.id">
         </label>
         <br>
         <label>
           Name
-          <input data-name="scenario.models[__model__].elements[__element__].name">
+          <input data-name="scenario.models.__model__.elements.__element__.name">
         </label>
         <br>
         <label>
           Symbol
-          <input data-name="scenario.models[__model__].elements[__element__].symbol">
+          <input data-name="scenario.models.__model__.elements.__element__.symbol">
         </label>
         <br>
         <label>
           Unit
-          <input data-name="scenario.models[__model__].elements[__element__].unit">
+          <input data-name="scenario.models.__model__.elements.__element__.unit">
         </label>
         <br>
         <label>
           Description
-          <textarea data-name="scenario.models[__model__].elements[__element__].description"></textarea>
+          <textarea data-name="scenario.models.__model__.elements.__element__.description"></textarea>
         </label>
         <br>
         <label>
           Element kind
-          <select data-element-kind data-name="scenario.models[__model__].elements[__element__].kind">
+          <select data-element-kind>
             <option value="uncertain">Uncertain element</option>
             <option value="fixed">Fixed/reference element</option>
           </select>
@@ -124,7 +129,7 @@
           <h4>Uncertainty</h4>
           <label>
             Type
-            <select data-uncertainty-type data-name="scenario.models[__model__].elements[__element__].uncertainty.type">
+            <select data-uncertainty-type data-name="scenario.models.__model__.elements.__element__.uncertainty.type">
               <option value="interval">interval</option>
               <option value="probabilistic">probabilistic</option>
               <option value="binary">binary</option>
@@ -133,43 +138,43 @@
           <br>
           <label>
             Source
-            <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.source">
+            <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.source">
           </label>
 
           <div data-uncertainty-fields="interval">
             <label>
               Min
-              <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.min" type="number" step="any">
+              <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.min" type="number" step="any">
             </label>
             <br>
             <label>
               Max
-              <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.max" type="number" step="any">
+              <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.max" type="number" step="any">
             </label>
           </div>
 
           <div data-uncertainty-fields="probabilistic">
-            <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.distribution" type="hidden" value="gaussian">
+            <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.distribution" type="hidden" value="gaussian">
             <label>
               Mean
-              <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.mean" type="number" step="any">
+              <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.mean" type="number" step="any">
             </label>
             <br>
             <label>
               Standard deviation
-              <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.std" type="number" step="any">
+              <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.std" type="number" step="any">
             </label>
           </div>
 
           <div data-uncertainty-fields="binary">
             <label>
               Option 0
-              <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.option_0">
+              <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.option_0">
             </label>
             <br>
             <label>
               Option 1
-              <input data-uncertainty-input data-name="scenario.models[__model__].elements[__element__].uncertainty.option_1">
+              <input data-uncertainty-input data-name="scenario.models.__model__.elements.__element__.uncertainty.option_1">
             </label>
           </div>
         </div>
@@ -178,12 +183,12 @@
           <h4>Fixed/reference value</h4>
           <label>
             Fixed value
-            <input data-fixed-input data-name="scenario.models[__model__].elements[__element__].fixed_value">
+            <input data-fixed-input data-name="scenario.models.__model__.elements.__element__.fixed_value">
           </label>
           <br>
           <label>
             Fixed value description
-            <textarea data-fixed-input data-name="scenario.models[__model__].elements[__element__].fixed_value_description"></textarea>
+            <textarea data-fixed-input data-name="scenario.models.__model__.elements.__element__.fixed_value_description"></textarea>
           </label>
         </div>
 
@@ -191,7 +196,7 @@
           <summary>Tier 2 and Tier 3 classification</summary>
           <label>
             Development phase
-            <select data-name="scenario.models[__model__].elements[__element__].classification.development_phase">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.development_phase">
               <option value=""></option>
               <option value="Design-Time">Design-Time</option>
               <option value="Run-Time">Run-Time</option>
@@ -201,7 +206,7 @@
           <br>
           <label>
             Reducibility level
-            <select data-name="scenario.models[__model__].elements[__element__].classification.reducibility_level">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.reducibility_level">
               <option value=""></option>
               <option value="Fully Reducible">Fully Reducible</option>
               <option value="Partially Reducible">Partially Reducible</option>
@@ -211,7 +216,7 @@
           <br>
           <label>
             Nature
-            <select data-name="scenario.models[__model__].elements[__element__].classification.nature">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.nature">
               <option value=""></option>
               <option value="Epistemic">Epistemic</option>
               <option value="Aleatory">Aleatory</option>
@@ -221,7 +226,7 @@
           <br>
           <label>
             Kind
-            <select data-name="scenario.models[__model__].elements[__element__].classification.kind">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.kind">
               <option value=""></option>
               <option value="Measurement Uncertainty">Measurement Uncertainty</option>
               <option value="Behavior Uncertainty">Behavior Uncertainty</option>
@@ -232,7 +237,7 @@
           <br>
           <label>
             Location type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.location_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.location_type">
               <option value=""></option>
               <option value="Parameter">Parameter</option>
               <option value="Model Structure">Model Structure</option>
@@ -244,7 +249,7 @@
           <br>
           <label>
             Source type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.source_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.source_type">
               <option value=""></option>
               <option value="Managed System">Managed System</option>
               <option value="Resources">Resources</option>
@@ -255,7 +260,7 @@
           <br>
           <label>
             Pattern type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.pattern_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.pattern_type">
               <option value=""></option>
               <option value="Persistent">Persistent</option>
               <option value="Transient">Transient</option>
@@ -265,7 +270,7 @@
           <br>
           <label>
             Perspective type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.perspective_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.perspective_type">
               <option value=""></option>
               <option value="Objective">Objective</option>
               <option value="Subjective">Subjective</option>
@@ -274,7 +279,7 @@
           <br>
           <label>
             Effect type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.effect_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.effect_type">
               <option value=""></option>
               <option value="Probabilistic+Continuous">Probabilistic+Continuous</option>
               <option value="Non-Deterministic+Discrete">Non-Deterministic+Discrete</option>
@@ -285,7 +290,7 @@
           <br>
           <label>
             Level type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.level_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.level_type">
               <option value=""></option>
               <option value="First-Level">First-Level</option>
               <option value="Second-Level">Second-Level</option>
@@ -295,7 +300,7 @@
           <br>
           <label>
             Risk type
-            <select data-name="scenario.models[__model__].elements[__element__].classification.risk_type">
+            <select data-name="scenario.models.__model__.elements.__element__.classification.risk_type">
               <option value=""></option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
@@ -305,7 +310,7 @@
           <br>
           <label>
             Risk scale
-            <input data-name="scenario.models[__model__].elements[__element__].classification.risk_scale" type="number" min="0" max="100">
+            <input data-name="scenario.models.__model__.elements.__element__.classification.risk_scale" type="number" min="0" max="100">
           </label>
         </details>
       </fieldset>
@@ -318,22 +323,22 @@
         <br>
         <label>
           Relation ID
-          <input data-name="scenario.consistency_relations[__relation__].id">
+          <input data-name="scenario.consistency_relations.__relation__.id">
         </label>
         <br>
         <label>
           From element ID
-          <input data-name="scenario.consistency_relations[__relation__].from_element_id">
+          <input data-name="scenario.consistency_relations.__relation__.from_element_id">
         </label>
         <br>
         <label>
           To element ID
-          <input data-name="scenario.consistency_relations[__relation__].to_element_id">
+          <input data-name="scenario.consistency_relations.__relation__.to_element_id">
         </label>
         <br>
         <label>
           Operator
-          <select data-name="scenario.consistency_relations[__relation__].operator">
+          <select data-name="scenario.consistency_relations.__relation__.operator">
             <option value=""></option>
             <option value="&lt;=">&lt;=</option>
             <option value="&gt;=">&gt;=</option>
@@ -344,12 +349,12 @@
         <br>
         <label>
           Expression
-          <input data-name="scenario.consistency_relations[__relation__].expression">
+          <input data-name="scenario.consistency_relations.__relation__.expression">
         </label>
         <br>
         <label>
           UPR type
-          <select data-name="scenario.consistency_relations[__relation__].upr_type">
+          <select data-name="scenario.consistency_relations.__relation__.upr_type">
             <option value="constraint_based">constraint_based</option>
             <option value="identity">identity</option>
             <option value="identity_bidir">identity_bidir</option>
@@ -362,12 +367,12 @@
         <br>
         <label>
           UPR sigma
-          <textarea data-name="scenario.consistency_relations[__relation__].upr_sigma"></textarea>
+          <textarea data-name="scenario.consistency_relations.__relation__.upr_sigma"></textarea>
         </label>
         <br>
         <label>
           Description
-          <textarea data-name="scenario.consistency_relations[__relation__].description"></textarea>
+          <textarea data-name="scenario.consistency_relations.__relation__.description"></textarea>
         </label>
       </fieldset>
     </template>
