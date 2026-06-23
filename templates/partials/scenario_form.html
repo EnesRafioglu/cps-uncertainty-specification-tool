@@ -1,0 +1,33 @@
+<form id="scenario-form" method="post" action="{{ url_for('validate') }}">
+  <h2>Scenario</h2>
+  <label>
+    Scenario ID
+    <input name="scenario.scenario_id">
+  </label>
+  <br>
+  <label>
+    Name
+    <input name="scenario.name">
+  </label>
+  <br>
+  <label>
+    Description
+    <textarea name="scenario.description"></textarea>
+  </label>
+  <br>
+  <label>
+    Natural-language description
+    <textarea name="scenario.nl_description"></textarea>
+  </label>
+
+  <h2>Models</h2>
+  <div id="models"></div>
+  <button type="button" id="add-model">+ Add model</button>
+
+  <h2>Consistency Relations</h2>
+  <div id="relations"></div>
+  <button type="button" id="add-relation">+ Add relation</button>
+
+  <br>
+  <button type="submit">Validate scenario</button>
+</form>

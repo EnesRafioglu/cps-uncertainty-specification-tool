@@ -1,0 +1,60 @@
+<template id="relation-template">
+  <fieldset data-relation>
+    <legend>Consistency relation</legend>
+    <button type="button" data-remove-relation>Remove relation</button>
+    <br>
+    <label>
+      Relation ID
+      <input data-name="scenario.consistency_relations.__relation__.id">
+    </label>
+    <br>
+    <label>
+      From element ID
+      <input data-name="scenario.consistency_relations.__relation__.from_element_id">
+    </label>
+    <br>
+    <label>
+      To element ID
+      <input data-name="scenario.consistency_relations.__relation__.to_element_id">
+    </label>
+    <br>
+    <label>
+      Operator
+      <select data-name="scenario.consistency_relations.__relation__.operator">
+        <option value=""></option>
+        <option value="&lt;=">&lt;=</option>
+        <option value="&gt;=">&gt;=</option>
+        <option value="=">=</option>
+        <option value="subset_of">subset_of</option>
+      </select>
+    </label>
+    <br>
+    <label>
+      Expression
+      <input data-name="scenario.consistency_relations.__relation__.expression">
+    </label>
+    <br>
+    <label>
+      UPR type
+      <select data-name="scenario.consistency_relations.__relation__.upr_type">
+        <option value="constraint_based">constraint_based</option>
+        <option value="identity">identity</option>
+        <option value="identity_bidir">identity_bidir</option>
+        <option value="parametric">parametric</option>
+        <option value="structural">structural</option>
+        <option value="guarded">guarded</option>
+        <option value="disambiguation">disambiguation</option>
+      </select>
+    </label>
+    <br>
+    <label>
+      UPR sigma
+      <textarea data-name="scenario.consistency_relations.__relation__.upr_sigma"></textarea>
+    </label>
+    <br>
+    <label>
+      Description
+      <textarea data-name="scenario.consistency_relations.__relation__.description"></textarea>
+    </label>
+  </fieldset>
+</template>
