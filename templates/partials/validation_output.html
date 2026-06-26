@@ -1,7 +1,4 @@
 <h2>Validation output</h2>
-{% if validation_result.status == "not_implemented" %}
-  <p>Validator interface is connected. Rules are not implemented yet.</p>
-{% endif %}
 
 <h3>Structural errors</h3>
 <ul>
@@ -29,3 +26,12 @@
     <li>None</li>
   {% endfor %}
 </ul>
+
+{% if validation_result.valid %}
+  <form method="post" action="{{ url_for('generate') }}">
+    <textarea name="scenario_json" hidden>{{ scenario | tojson }}</textarea>
+    <button type="submit">Generate zonotopes</button>
+  </form>
+{% else %}
+  <p>Generation is blocked until structural errors are fixed.</p>
+{% endif %}

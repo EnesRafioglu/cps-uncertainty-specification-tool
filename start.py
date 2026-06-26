@@ -1,6 +1,9 @@
+import json
+
 from flask import Flask, render_template, request
 
 from core.form_parser import build_scenario_from_form
+from core.generator import generate_zonotopes
 from core.validator import validate_scenario
 
 
@@ -16,6 +19,7 @@ def index():
         validation_was_requested=False,
         scenario=None,
         validation_result=None,
+        generation_result=None,
     )
 
 
@@ -29,6 +33,25 @@ def validate():
         validation_was_requested=True,
         scenario=scenario,
         validation_result=validation_result,
+        generation_result=None,
+    )
+
+
+@app.post("/generate")
+def generate():
+    scenario = json.loads(request.form["scenario_json"])
+    validation_result = validate_scenario(scenario)
+    generation_result = None
+
+    if validation_result["valid"]:
+        generation_result = generate_zonotopes(scenario)
+
+    return render_template(
+        "index.html",
+        validation_was_requested=True,
+        scenario=scenario,
+        validation_result=validation_result,
+        generation_result=generation_result,
     )
 
 

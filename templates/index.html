@@ -11,7 +11,10 @@
 
     {% if validation_was_requested %}
       {% include "partials/validation_output.html" %}
-      {% include "partials/json_output.html" %}
+    {% endif %}
+
+    {% if generation_result %}
+      {% include "partials/generation_output.html" %}
     {% endif %}
 
     {% include "partials/model_template.html" %}
