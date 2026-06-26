@@ -9,13 +9,7 @@
 
     {% include "partials/scenario_form.html" %}
 
-    {% if validation_was_requested %}
-      {% include "partials/validation_output.html" %}
-    {% endif %}
-
-    {% if generation_result %}
-      {% include "partials/generation_output.html" %}
-    {% endif %}
+    <section id="validation-output" hidden></section>
 
     {% include "partials/model_template.html" %}
     {% include "partials/element_template.html" %}

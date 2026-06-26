@@ -1,5 +1,7 @@
 const modelsContainer = document.querySelector("#models");
 const relationsContainer = document.querySelector("#relations");
+const scenarioForm = document.querySelector("#scenario-form");
+const validationOutput = document.querySelector("#validation-output");
 
 document.querySelector("#add-model").addEventListener("click", () => {
   addModel();
@@ -9,6 +11,18 @@ document.querySelector("#add-model").addEventListener("click", () => {
 document.querySelector("#add-relation").addEventListener("click", () => {
   addRelation();
   updateNames();
+});
+
+scenarioForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const response = await fetch("/api/validate", {
+    method: "POST",
+    body: new FormData(scenarioForm),
+  });
+  const data = await response.json();
+
+  renderValidationResult(data.validation_result);
 });
 
 function addModel() {
@@ -114,6 +128,72 @@ function updateElementVisibility(element) {
       });
     });
   }
+}
+
+function renderValidationResult(result) {
+  validationOutput.hidden = false;
+  validationOutput.innerHTML = "";
+
+  validationOutput.appendChild(createHeading("Validation output", 2));
+  if (
+    result.structural_errors.length === 0
+    && result.completeness_warnings.length === 0
+    && result.cross_field_warnings.length === 0
+  ) {
+    const message = document.createElement("p");
+    message.textContent = "No validation issues.";
+    validationOutput.appendChild(message);
+  }
+
+  appendIssueList("Structural errors", result.structural_errors);
+  appendIssueList("Completeness warnings", result.completeness_warnings);
+  appendIssueList("Cross-field warnings", result.cross_field_warnings);
+
+  if (result.valid) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Generate zonotopes";
+    button.addEventListener("click", submitForGeneration);
+    validationOutput.appendChild(button);
+  } else {
+    const message = document.createElement("p");
+    message.textContent = "Generation is blocked until structural errors are fixed.";
+    validationOutput.appendChild(message);
+  }
+}
+
+function submitForGeneration() {
+  scenarioForm.action = "/generate";
+  scenarioForm.submit();
+}
+
+function appendIssueList(title, issues) {
+  if (issues.length === 0) {
+    return;
+  }
+
+  validationOutput.appendChild(createIssueList(title, issues));
+}
+
+function createIssueList(title, issues) {
+  const section = document.createElement("section");
+  section.appendChild(createHeading(title, 3));
+
+  const list = document.createElement("ul");
+  issues.forEach((issue) => {
+    const item = document.createElement("li");
+    item.textContent = issue;
+    list.appendChild(item);
+  });
+
+  section.appendChild(list);
+  return section;
+}
+
+function createHeading(text, level) {
+  const heading = document.createElement(`h${level}`);
+  heading.textContent = text;
+  return heading;
 }
 
 updateNames();

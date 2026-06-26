@@ -1,6 +1,4 @@
-import json
-
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, render_template, request
 
 from core.form_parser import build_scenario_from_form
 from core.generator import generate_zonotopes
@@ -14,32 +12,22 @@ app.jinja_env.policies["json.dumps_kwargs"]["sort_keys"] = False
 
 @app.get("/")
 def index():
-    return render_template(
-        "index.html",
-        validation_was_requested=False,
-        scenario=None,
-        validation_result=None,
-        generation_result=None,
-    )
+    return render_template("index.html")
 
 
-@app.post("/validate")
-def validate():
+@app.post("/api/validate")
+def validate_api():
     scenario = build_scenario_from_form(request.form)
     validation_result = validate_scenario(scenario)
 
-    return render_template(
-        "index.html",
-        validation_was_requested=True,
-        scenario=scenario,
-        validation_result=validation_result,
-        generation_result=None,
-    )
+    return jsonify({
+        "validation_result": validation_result,
+    })
 
 
 @app.post("/generate")
 def generate():
-    scenario = json.loads(request.form["scenario_json"])
+    scenario = build_scenario_from_form(request.form)
     validation_result = validate_scenario(scenario)
     generation_result = None
 
@@ -47,9 +35,7 @@ def generate():
         generation_result = generate_zonotopes(scenario)
 
     return render_template(
-        "index.html",
-        validation_was_requested=True,
-        scenario=scenario,
+        "generated.html",
         validation_result=validation_result,
         generation_result=generation_result,
     )
