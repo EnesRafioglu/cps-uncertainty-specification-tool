@@ -1,11 +1,13 @@
 def validate_scenario(scenario: dict) -> dict:
    structural_errors = check_structural_rules(scenario)
+   completeness_warnings = check_completeness_rules(scenario)
+   cross_field_warnings = check_cross_field_rules(scenario)
 
    return {
       "valid": len(structural_errors) == 0,
       "structural_errors": structural_errors,
-      "completeness_warnings": [],
-      "cross_field_warnings": [],
+      "completeness_warnings": completeness_warnings,
+      "cross_field_warnings": cross_field_warnings,
    }
 
 def check_structural_rules(scenario: dict) -> list:
@@ -96,6 +98,70 @@ def check_structural_rules(scenario: dict) -> list:
          or "to_element_id" in relation and relation["to_element_id"] not in element_ids
       ):
          ans.append(f"Relation {i} does not reference valid elements")
+
+   return ans
+
+
+def check_completeness_rules(scenario: dict) -> list:
+   ans = []
+
+   if not scenario.get("consistency_relations"):
+      ans.append("Scenario does not have any consistency relations")
+
+   for i, model in enumerate(scenario.get("models", [])):
+      for j, element in enumerate(model.get("elements", [])):
+         if "uncertainty" not in element:
+            continue
+
+         classification = element.get("classification", {})
+         missing_fields = [
+            field for field in ["development_phase", "reducibility_level"]
+            if field not in classification
+         ]
+
+         if missing_fields:
+            ans.append(
+               f"Element {j} of model {i} is missing recommended classification fields: {', '.join(missing_fields)}"
+            )
+
+   return ans
+
+
+def check_cross_field_rules(scenario: dict) -> list:
+   ans = []
+
+   for i, model in enumerate(scenario.get("models", [])):
+      for j, element in enumerate(model.get("elements", [])):
+         if "uncertainty" not in element:
+            continue
+
+         uncertainty = element["uncertainty"]
+         uncertainty_type = uncertainty["type"]
+         classification = element.get("classification", {})
+
+         if (
+            classification.get("nature") == "Aleatory"
+            and uncertainty_type not in ["interval", "probabilistic"]
+         ):
+            ans.append(
+               f"Element {j} of model {i} has nature Aleatory but uncertainty type is not interval or probabilistic"
+            )
+
+         if (
+            classification.get("reducibility_level") == "Fully Reducible"
+            and classification.get("nature") != "Epistemic"
+         ):
+            ans.append(
+               f"Element {j} of model {i} is Fully Reducible but nature is not Epistemic"
+            )
+
+         if (
+            classification.get("risk_type") == "High"
+            and classification.get("risk_scale", 0) < 70
+         ):
+            ans.append(
+               f"Element {j} of model {i} has risk type High but risk scale is below 70"
+            )
 
    return ans
          
