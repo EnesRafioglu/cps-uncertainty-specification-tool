@@ -11,17 +11,15 @@ def generate_matlab_output(scenario: dict) -> str:
 
    for model in scenario["models"]:
       lines.append(f"\n% Model ID: {model["id"]}")
-      lines.append(f"% Model name: {model["name"]}\n")
+      lines.append(f"% Model name: {model["name"]}")
 
-      has_uncertain_element = False
 
       for element in model["elements"]:
-         lines.append(f"% Element: {element["name"]}")
+         lines.append(f"\n% Element: {element["name"]}")
          lines.append(f"% Symbol: {element["symbol"]}")
          lines.append(f"% Unit: {element["unit"]}")
 
          if "uncertainty" in element:
-            has_uncertain_element = True
             uncertainty = element["uncertainty"]
             u_type = uncertainty["type"]
             lines.append(f"% Uncertainty type: {u_type}\n")
@@ -45,8 +43,19 @@ def generate_matlab_output(scenario: dict) -> str:
                lines.append(f"% Options: 0 = {option_0}, 1 = {option_1}")
                lines.extend(make_logical_zonotope(symbol))
 
-      if not has_uncertain_element:
-         lines.append("% Model has no uncertain elements.")
+         elif "fixed_value" in element:
+            symbol = element["symbol"]
+            fixed_value = element["fixed_value"]
+            lines.append("% Fixed/reference value\n")
+            lines.append(f"{symbol} = {fixed_value};")
+
+   if scenario.get("consistency_relations"):
+      lines.append("\n%% Consistency relations")
+      for relation in scenario["consistency_relations"]:
+         relation_id = relation["id"]
+         upr_type = relation["upr_type"]
+         expression = relation["expression"]
+         lines.append(f"% {relation_id} [{upr_type}]: {expression}")
 
    return "\n".join(lines)
 
