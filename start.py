@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 
 from core.form_parser import build_scenario_from_form
-from core.generator import generate_zonotopes
+from core.generator import generate_matlab_output
 from core.validator import validate_scenario
 
 
@@ -28,15 +28,10 @@ def validate_api():
 @app.post("/generate")
 def generate():
     scenario = build_scenario_from_form(request.form)
-    validation_result = validate_scenario(scenario)
-    generation_result = None
-
-    if validation_result["valid"]:
-        generation_result = generate_zonotopes(scenario)
+    generation_result = generate_matlab_output(scenario)
 
     return render_template(
         "generated.html",
-        validation_result=validation_result,
         generation_result=generation_result,
     )
 

@@ -4,14 +4,19 @@ const scenarioForm = document.querySelector("#scenario-form");
 const validationOutput = document.querySelector("#validation-output");
 
 document.querySelector("#add-model").addEventListener("click", () => {
+  clearValidationOutput();
   addModel();
   updateNames();
 });
 
 document.querySelector("#add-relation").addEventListener("click", () => {
+  clearValidationOutput();
   addRelation();
   updateNames();
 });
+
+scenarioForm.addEventListener("input", clearValidationOutput);
+scenarioForm.addEventListener("change", clearValidationOutput);
 
 scenarioForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -30,11 +35,13 @@ function addModel() {
   const model = node.querySelector("[data-model]");
 
   model.querySelector("[data-remove-model]").addEventListener("click", () => {
+    clearValidationOutput();
     model.remove();
     updateNames();
   });
 
   model.querySelector("[data-add-element]").addEventListener("click", () => {
+    clearValidationOutput();
     addElement(model);
     updateNames();
   });
@@ -47,6 +54,7 @@ function addElement(model) {
   const element = node.querySelector("[data-element]");
 
   element.querySelector("[data-remove-element]").addEventListener("click", () => {
+    clearValidationOutput();
     element.remove();
     updateNames();
   });
@@ -67,6 +75,7 @@ function addRelation() {
   const relation = node.querySelector("[data-relation]");
 
   relation.querySelector("[data-remove-relation]").addEventListener("click", () => {
+    clearValidationOutput();
     relation.remove();
     updateNames();
   });
@@ -160,6 +169,11 @@ function renderValidationResult(result) {
     message.textContent = "Generation is blocked until structural errors are fixed.";
     validationOutput.appendChild(message);
   }
+}
+
+function clearValidationOutput() {
+  validationOutput.hidden = true;
+  validationOutput.innerHTML = "";
 }
 
 function submitForGeneration() {
