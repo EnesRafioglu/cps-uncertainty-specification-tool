@@ -1,2 +1,6 @@
-def generate_zonotopes(scenario: dict) -> str:
-   return "Hello World"
+def generate_matlab_output(scenario: dict) -> str:
+   lines = [
+       
+   ]
+
+   return lines
