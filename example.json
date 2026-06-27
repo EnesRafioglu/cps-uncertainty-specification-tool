@@ -1,0 +1,130 @@
+{
+  "scenario_id": "scenario_demo_01",
+  "name": "Demo Scenario",
+  "description": "Example scenario showing interval, probabilistic, and binary uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Thermal Simulation Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Motor Temperature",
+          "symbol": "T_motor",
+          "unit": "degC",
+          "description": "Operating temperature of the motor.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thermal simulation",
+            "min": 102,
+            "max": 118
+          },
+          "classification": {
+            "development_phase": "Design-Time",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "risk_type": "High",
+            "risk_scale": 75
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Maximum Motor Temperature",
+          "symbol": "T_max",
+          "unit": "degC",
+          "description": "Safety threshold for motor temperature.",
+          "fixed_value": 110
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Sensor Performance Model",
+      "type": "SensorPerformanceModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "LiDAR Quality",
+          "symbol": "q_lidar",
+          "unit": "score",
+          "description": "Quality score of LiDAR perception.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Field measurements",
+            "distribution": "gaussian",
+            "mean": 0.92,
+            "std": 0.03
+          },
+          "classification": {
+            "development_phase": "Run-Time",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "risk_type": "Medium",
+            "risk_scale": 50
+          }
+        },
+        {
+          "id": "e4",
+          "name": "Minimum LiDAR Quality",
+          "symbol": "q_min",
+          "unit": "score",
+          "description": "Minimum acceptable LiDAR quality.",
+          "fixed_value": 0.9
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Software Architecture Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e5",
+          "name": "Migration Decision",
+          "symbol": "b_migration",
+          "unit": "boolean",
+          "description": "Whether the system migrates to the merged architecture.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Architecture decision",
+            "option_0": "legacy_architecture",
+            "option_1": "merged_architecture"
+          },
+          "classification": {
+            "development_phase": "Design-Time",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "risk_type": "Low",
+            "risk_scale": 30
+          }
+        },
+        {
+          "id": "e6",
+          "name": "Merged Architecture",
+          "symbol": "a_merged",
+          "unit": "boolean",
+          "description": "Reference element representing the merged architecture."
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "expression": "T_motor <= T_max",
+      "upr_type": "constraint_based",
+      "description": "Motor temperature must stay below the safety threshold."
+    },
+    {
+      "id": "CR2",
+      "from_element_id": "e3",
+      "to_element_id": "e4",
+      "expression": "q_lidar >= q_min",
+      "upr_type": "constraint_based",
+      "description": "LiDAR quality must stay above the required minimum."
+    }
+  ]
+}
