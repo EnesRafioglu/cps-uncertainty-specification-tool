@@ -99,7 +99,7 @@
     </div>
 
     <details data-classification-block>
-      <summary>Tier 2 and Tier 3 classification</summary>
+      <summary>Classification</summary>
       <label>
         Development phase
         <select data-name="scenario.models.__model__.elements.__element__.classification.development_phase">
@@ -138,6 +138,48 @@
           <option value="Behavior Uncertainty">Behavior Uncertainty</option>
           <option value="Belief Uncertainty">Belief Uncertainty</option>
           <option value="Other">Other</option>
+        </select>
+      </label>
+      <br>
+      <label>
+        Atomic component type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.atomic_component_type">
+          <option value=""></option>
+          <option value="Thermal">Thermal</option>
+          <option value="Mechanical">Mechanical</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Cyber">Cyber</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+      <br>
+      <label>
+        Component type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.component_type">
+          <option value=""></option>
+          <option value="Physical">Physical</option>
+          <option value="Cyber">Cyber</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+      </label>
+      <br>
+      <label>
+        System type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.system_type">
+          <option value=""></option>
+          <option value="Cyber-Physical">Cyber-Physical</option>
+          <option value="Physical">Physical</option>
+          <option value="Cyber">Cyber</option>
+        </select>
+      </label>
+      <br>
+      <label>
+        Autonomy type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.autonomy_type">
+          <option value=""></option>
+          <option value="Autonomous">Autonomous</option>
+          <option value="Non-Autonomous">Non-Autonomous</option>
+          <option value="Semi-Autonomous">Semi-Autonomous</option>
         </select>
       </label>
       <br>
