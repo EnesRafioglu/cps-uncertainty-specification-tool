@@ -1,3 +1,21 @@
+import re
+
+
+MATLAB_IDENTIFIER_REGEX = r"^[A-Za-z][A-Za-z0-9_]*$"
+SCENARIO_ID_REGEX = r"^[a-z0-9_]+$"
+GENERIC_ID_REGEX = r"^[A-Za-z0-9_]+$"
+
+MATLAB_KEYWORDS = {
+   "break", "case", "catch", "classdef", "continue", "else", "elseif",
+   "end", "for", "function", "global", "if", "otherwise", "parfor",
+   "persistent", "return", "spmd", "switch", "try", "while",
+}
+
+MATLAB_IDENTIFIER_PATTERN = re.compile(MATLAB_IDENTIFIER_REGEX)
+SCENARIO_ID_PATTERN = re.compile(SCENARIO_ID_REGEX)
+GENERIC_ID_PATTERN = re.compile(GENERIC_ID_REGEX)
+
+
 def validate_scenario(scenario: dict) -> dict:
    structural_errors = check_structural_rules(scenario)
    completeness_warnings = check_completeness_rules(scenario)
@@ -10,96 +28,223 @@ def validate_scenario(scenario: dict) -> dict:
       "cross_field_warnings": cross_field_warnings,
    }
 
-def check_structural_rules(scenario: dict) -> list:
-   ans = []
-   model_ids, element_ids, relation_ids = set(), set(), set()
 
-   missing_scenario_fields = [field for field in ["scenario_id", "name"] if field not in scenario]
-   if missing_scenario_fields:
-      ans.append(f"Scenario is missing the following required fields: {','.join(missing_scenario_fields)}")
+def check_structural_rules(scenario: dict) -> list:
+   errors = []
+   seen_model_ids, seen_element_ids, seen_relation_ids = set(), set(), set()
+   seen_matlab_symbols = set()
+
+   check_scenario_identity(errors, scenario)
 
    if not scenario.get("models"):
-      ans.append("Scenario does not have any models")
+      errors.append("Scenario does not have any models")
 
-   for i, model in enumerate(scenario.get("models", [])):
-      if "id" not in model:
-         ans.append(f"Model {i} does not have an ID")
-      
-      elif model["id"] in model_ids:
-         ans.append(f"Model {i} does not have a unique ID")
+   for model_index, model in enumerate(scenario.get("models", [])):
+      check_model(
+         errors,
+         model,
+         model_index,
+         seen_model_ids,
+         seen_element_ids,
+         seen_matlab_symbols,
+      )
 
-      else: 
-         model_ids.add(model["id"])
+   for relation_index, relation in enumerate(scenario.get("consistency_relations", [])):
+      check_relation(errors, relation, relation_index, seen_relation_ids, seen_element_ids)
 
-      if "name" not in model:
-         ans.append(f"Model {i} does not have a name")
+   return errors
 
-      if not model.get("elements"):
-         ans.append(f"Model {i} does not have any elements")
 
-      uncertain_element_count = 0
-      for j, element in enumerate(model.get("elements", [])):
+def check_scenario_identity(errors: list, scenario: dict):
+   missing_fields = missing_required_fields(scenario, ["scenario_id", "name"])
+   if missing_fields:
+      errors.append(f"Scenario is missing the following required fields: {','.join(missing_fields)}")
+      return
 
-         missing_fields = [field for field in ["id", "name", "symbol", "unit"] if field not in element]
-         if missing_fields:
-            ans.append(f"Element {j} of model {i} is missing the following required fields: {", ".join(missing_fields)}")
-         
-         if "id" in element:
-            if element["id"] in element_ids:
-               ans.append(f"Element {j} of model {i} does not have a unique ID")
-            
-            element_ids.add(element["id"])
-         
-         if "uncertainty" not in element and "fixed_value" not in element:
-            ans.append(f"Element {j} of model {i} has neither uncertainty nor a fixed value")
-         
-         if "uncertainty" in element:
-            uncertain_element_count += 1
-            uncertainty = element["uncertainty"]
-            uncertainty_type = uncertainty["type"]
+   add_pattern_error(errors, "Scenario ID", scenario["scenario_id"], SCENARIO_ID_PATTERN, SCENARIO_ID_REGEX)
 
-            if uncertainty_type == "interval":
-               if "min" not in uncertainty or "max" not in uncertainty:
-                  ans.append(f"Element {j} of model {i} has interval uncertainty but is missing min or max")
-               
-               elif uncertainty["min"] >= uncertainty["max"]:
-                  ans.append(f"Element {j} of model {i} has interval uncertainty but min is not smaller than max")
-            
-            elif uncertainty_type == "probabilistic":
-               if "mean" not in uncertainty or "std" not in uncertainty:
-                  ans.append(f"Element {j} of model {i} has probabilistic uncertainty but is missing mean or std")
-               
-               elif uncertainty["std"] <= 0:
-                  ans.append(f"Element {j} of model {i} has probabilistic uncertainty but std is not greater than 0")
-            
-            else:
-               if "option_0" not in uncertainty or "option_1" not in uncertainty:
-                  ans.append(f"Element {j} of model {i} has binary uncertainty but the options are not specified")
-               
-               elif uncertainty["option_0"] == uncertainty["option_1"]:
-                  ans.append(f"Element {j} of model {i} has binary uncertainty but the options are the same")
 
-      if uncertain_element_count > 1:
-         ans.append(f"More than 1 uncertain element per model is currently not supported")
+def check_model(
+   errors: list,
+   model: dict,
+   model_index: int,
+   seen_model_ids: set,
+   seen_element_ids: set,
+   seen_matlab_symbols: set,
+):
+   check_unique_id(
+      errors,
+      value=model.get("id"),
+      seen_ids=seen_model_ids,
+      missing_message=f"Model {model_index} does not have an ID",
+      duplicate_message=f"Model {model_index} does not have a unique ID",
+      pattern_label=f"Model {model_index} ID",
+   )
 
-   for i, relation in enumerate(scenario.get("consistency_relations", [])):
-      missing_fields = [field for field in ["id", "from_element_id", "to_element_id", "expression"] if field not in relation]
-      if missing_fields:
-         ans.append(f"Relation {i} is missing the following required fields: {", ".join(missing_fields)}")
-      
-      if "id" in relation:
-         if relation["id"] in relation_ids:
-            ans.append(f"Relation {i} does not have a unique ID")
-         
-         relation_ids.add(relation["id"])
-      
-      if (
-         "from_element_id" in relation and relation["from_element_id"] not in element_ids
-         or "to_element_id" in relation and relation["to_element_id"] not in element_ids
-      ):
-         ans.append(f"Relation {i} does not reference valid elements")
+   if "name" not in model:
+      errors.append(f"Model {model_index} does not have a name")
 
-   return ans
+   elements = model.get("elements", [])
+   if not elements:
+      errors.append(f"Model {model_index} does not have any elements")
+
+   uncertain_element_count = 0
+   for element_index, element in enumerate(elements):
+      if "uncertainty" in element:
+         uncertain_element_count += 1
+
+      check_element(errors, element, model_index, element_index, seen_element_ids, seen_matlab_symbols)
+
+   if uncertain_element_count > 1:
+      errors.append("More than 1 uncertain element per model is currently not supported")
+
+
+def check_element(
+   errors: list,
+   element: dict,
+   model_index: int,
+   element_index: int,
+   seen_element_ids: set,
+   seen_matlab_symbols: set,
+):
+   element_label = f"Element {element_index} of model {model_index}"
+   missing_fields = missing_required_fields(element, ["id", "name", "symbol", "unit"])
+
+   if missing_fields:
+      errors.append(f"{element_label} is missing the following required fields: {', '.join(missing_fields)}")
+
+   if "id" in element:
+      check_unique_id(
+         errors,
+         value=element["id"],
+         seen_ids=seen_element_ids,
+         missing_message=f"{element_label} does not have an ID",
+         duplicate_message=f"{element_label} does not have a unique ID",
+         pattern_label=f"{element_label} ID",
+      )
+
+   if "symbol" in element:
+      add_matlab_identifier_error(errors, f"{element_label} symbol", element["symbol"])
+      add_matlab_identifier_collision_error(errors, seen_matlab_symbols, f"{element_label} symbol", element["symbol"])
+
+   if "uncertainty" not in element and "fixed_value" not in element:
+      errors.append(f"{element_label} has neither uncertainty nor a fixed value")
+
+   if "uncertainty" in element:
+      check_uncertainty(errors, element["uncertainty"], model_index, element_index)
+
+
+def check_uncertainty(errors: list, uncertainty: dict, model_index: int, element_index: int):
+   label = f"Element {element_index} of model {model_index}"
+   uncertainty_type = uncertainty["type"]
+
+   if uncertainty_type == "interval":
+      check_interval_uncertainty(errors, uncertainty, label)
+   elif uncertainty_type == "probabilistic":
+      check_probabilistic_uncertainty(errors, uncertainty, label)
+   else:
+      check_binary_uncertainty(errors, uncertainty, label)
+
+
+def check_interval_uncertainty(errors: list, uncertainty: dict, label: str):
+   if "min" not in uncertainty or "max" not in uncertainty:
+      errors.append(f"{label} has interval uncertainty but is missing min or max")
+   elif uncertainty["min"] >= uncertainty["max"]:
+      errors.append(f"{label} has interval uncertainty but min is not smaller than max")
+
+
+def check_probabilistic_uncertainty(errors: list, uncertainty: dict, label: str):
+   if "mean" not in uncertainty or "std" not in uncertainty:
+      errors.append(f"{label} has probabilistic uncertainty but is missing mean or std")
+   elif uncertainty["std"] <= 0:
+      errors.append(f"{label} has probabilistic uncertainty but std is not greater than 0")
+
+
+def check_binary_uncertainty(errors: list, uncertainty: dict, label: str):
+   if "option_0" not in uncertainty or "option_1" not in uncertainty:
+      errors.append(f"{label} has binary uncertainty but the options are not specified")
+   elif uncertainty["option_0"] == uncertainty["option_1"]:
+      errors.append(f"{label} has binary uncertainty but the options are the same")
+
+
+def check_relation(
+   errors: list,
+   relation: dict,
+   relation_index: int,
+   seen_relation_ids: set,
+   seen_element_ids: set,
+):
+   missing_fields = missing_required_fields(relation, ["id", "from_element_id", "to_element_id", "expression"])
+   if missing_fields:
+      errors.append(f"Relation {relation_index} is missing the following required fields: {', '.join(missing_fields)}")
+
+   if "id" in relation:
+      check_unique_id(
+         errors,
+         value=relation["id"],
+         seen_ids=seen_relation_ids,
+         missing_message=f"Relation {relation_index} does not have an ID",
+         duplicate_message=f"Relation {relation_index} does not have a unique ID",
+         pattern_label=f"Relation {relation_index} ID",
+      )
+
+   references_invalid_element = (
+      "from_element_id" in relation and relation["from_element_id"] not in seen_element_ids
+      or "to_element_id" in relation and relation["to_element_id"] not in seen_element_ids
+   )
+   if references_invalid_element:
+      errors.append(f"Relation {relation_index} does not reference valid elements")
+
+
+def check_unique_id(
+   errors: list,
+   value,
+   seen_ids: set,
+   missing_message: str,
+   duplicate_message: str,
+   pattern_label: str,
+):
+   if value is None:
+      errors.append(missing_message)
+      return
+
+   if value in seen_ids:
+      errors.append(duplicate_message)
+   else:
+      add_pattern_error(errors, pattern_label, value, GENERIC_ID_PATTERN, GENERIC_ID_REGEX)
+      seen_ids.add(value)
+
+
+def missing_required_fields(data: dict, fields: list) -> list:
+   return [field for field in fields if field not in data]
+
+
+def add_pattern_error(errors: list, label: str, value, pattern, pattern_text: str):
+   if pattern.fullmatch(str(value)):
+      return
+
+   errors.append(f"{label} must match pattern {pattern_text}")
+
+
+def is_valid_matlab_identifier(value) -> bool:
+   value = str(value)
+   return bool(MATLAB_IDENTIFIER_PATTERN.fullmatch(value)) and value not in MATLAB_KEYWORDS
+
+
+def add_matlab_identifier_error(errors: list, label: str, value):
+   if is_valid_matlab_identifier(value):
+      return
+
+   errors.append(
+      f"{label} must be a valid MATLAB identifier. Use pattern {MATLAB_IDENTIFIER_REGEX} and avoid MATLAB keywords."
+   )
+
+
+def add_matlab_identifier_collision_error(errors: list, used_names: set, label: str, value):
+   if value in used_names:
+      errors.append(f"{label} conflicts with another MATLAB identifier: '{value}'")
+
+   used_names.add(value)
 
 
 def check_completeness_rules(scenario: dict) -> list:
@@ -107,6 +252,17 @@ def check_completeness_rules(scenario: dict) -> list:
 
    if not scenario.get("consistency_relations"):
       ans.append("Scenario does not have any consistency relations")
+
+   for i, relation in enumerate(scenario.get("consistency_relations", [])):
+      missing_fields = [
+         field for field in ["upr_sigma", "upr_description"]
+         if field not in relation
+      ]
+
+      if missing_fields:
+         ans.append(
+            f"Relation {i} is missing recommended UPR fields: {', '.join(missing_fields)}"
+         )
 
    for i, model in enumerate(scenario.get("models", [])):
       for j, element in enumerate(model.get("elements", [])):
@@ -164,4 +320,3 @@ def check_cross_field_rules(scenario: dict) -> list:
             )
 
    return ans
-         

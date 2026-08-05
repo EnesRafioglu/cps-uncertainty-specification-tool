@@ -45,20 +45,26 @@ http://127.0.0.1:5001
 Structural errors block generation:
 
 - Scenario must have `scenario_id` and `name`.
+- `scenario_id` must match `^[a-z0-9_]+$`.
 - Scenario must contain at least one model.
 - Each model must have a unique `id`, a `name`, and at least one element.
+- Model IDs must match `^[A-Za-z0-9_]+$`.
 - Each element must have unique `id`, `name`, `symbol`, and `unit`.
+- Element IDs must match `^[A-Za-z0-9_]+$`.
+- Element symbols must be valid MATLAB identifiers and must not collide with another element symbol.
 - Each element must have either an `uncertainty` block or a `fixed_value`.
 - Each model may have at most one uncertain element.
 - Interval uncertainty requires `min < max`.
 - Probabilistic uncertainty requires `mean`, `std`, and `std > 0`.
 - Binary uncertainty requires different `option_0` and `option_1`.
 - Consistency relations must have `id`, `from_element_id`, `to_element_id`, and `expression`.
+- Consistency relation IDs must match `^[A-Za-z0-9_]+$`.
 - Consistency relations must reference existing element IDs.
 
 Completeness warnings allow generation:
 
 - Scenario should contain at least one consistency relation.
+- Consistency relations should include `upr_sigma` and `upr_description`.
 - Uncertain elements should include `development_phase` and `reducibility_level`.
 
 Cross-field warnings allow generation:
