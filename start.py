@@ -28,11 +28,20 @@ def validate_api():
 @app.post("/generate")
 def generate():
     scenario = build_scenario_from_form(request.form)
+    validation_result = validate_scenario(scenario)
+    if not validation_result["valid"]:
+        return render_template(
+            "generated.html",
+            generation_result=None,
+            validation_result=validation_result,
+        ), 400
+
     generation_result = generate_matlab_output(scenario)
 
     return render_template(
         "generated.html",
         generation_result=generation_result,
+        validation_result=validation_result,
     )
 
 

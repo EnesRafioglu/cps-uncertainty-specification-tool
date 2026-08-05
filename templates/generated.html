@@ -7,7 +7,16 @@
   <body>
     <h1>Generated output</h1>
 
-    <pre>{{ generation_result }}</pre>
+    {% if generation_result %}
+      <pre>{{ generation_result }}</pre>
+    {% else %}
+      <p>Generation is blocked until structural errors are fixed.</p>
+      <ul>
+        {% for error in validation_result.structural_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
     <button type="button" onclick="history.back()">Go back</button>
     <form method="get" action="{{ url_for('index') }}">
