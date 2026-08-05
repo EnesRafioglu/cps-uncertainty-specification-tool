@@ -8,6 +8,7 @@
     <h1>Generated output</h1>
 
     {% if generation_result %}
+      <h2>MATLAB</h2>
       <pre>{{ generation_result }}</pre>
     {% else %}
       <p>Generation is blocked until structural errors are fixed.</p>
@@ -17,6 +18,9 @@
         {% endfor %}
       </ul>
     {% endif %}
+
+    <h2>JSON</h2>
+    <pre>{{ scenario_json }}</pre>
 
     <button type="button" onclick="history.back()">Go back</button>
     <form method="get" action="{{ url_for('index') }}">

@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, jsonify, render_template, request
 
 from core.form_parser import build_scenario_from_form
@@ -27,10 +29,13 @@ def validate_api():
 @app.post("/generate")
 def generate():
     scenario, validation_result = parse_and_validate_form(request.form)
+    scenario_json = json.dumps(scenario, indent=2)
+
     if not validation_result["valid"]:
         return render_template(
             "generated.html",
             generation_result=None,
+            scenario_json=scenario_json,
             validation_result=validation_result,
         ), 400
 
@@ -39,6 +44,7 @@ def generate():
     return render_template(
         "generated.html",
         generation_result=generation_result,
+        scenario_json=scenario_json,
         validation_result=validation_result,
     )
 
