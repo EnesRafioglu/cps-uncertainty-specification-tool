@@ -21,7 +21,7 @@ http://127.0.0.1:5001
 
 - The UI accepts scenarios with multiple models.
 - Each model may contain fixed elements and uncertain elements.
-- Currently, generation/validation supports **at most one uncertain element per model**.
+- Each uncertain element generates its own zonotope.
 - Supported uncertainty types:
   - `interval`: `min`, `max`
   - `probabilistic`: `mean`, `std`
@@ -53,7 +53,6 @@ Structural errors block generation:
 - Element IDs must match `^[A-Za-z0-9_]+$`.
 - Element symbols must be valid MATLAB identifiers and must not collide with another element symbol.
 - Each element must have either an `uncertainty` block or a `fixed_value`.
-- Each model may have at most one uncertain element.
 - Interval uncertainty requires `min < max`.
 - Probabilistic uncertainty requires `mean`, `std`, and `std > 0`.
 - Binary uncertainty requires different `option_0` and `option_1`.

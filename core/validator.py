@@ -88,15 +88,8 @@ def check_model(
    if not elements:
       errors.append(f"Model {model_index} does not have any elements")
 
-   uncertain_element_count = 0
    for element_index, element in enumerate(elements):
-      if "uncertainty" in element:
-         uncertain_element_count += 1
-
       check_element(errors, element, model_index, element_index, seen_element_ids, seen_matlab_symbols)
-
-   if uncertain_element_count > 1:
-      errors.append("More than 1 uncertain element per model is currently not supported")
 
 
 def check_element(
