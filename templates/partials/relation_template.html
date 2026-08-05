@@ -19,6 +19,18 @@
     </label>
     <br>
     <label>
+      Operator
+      <select data-name="scenario.consistency_relations.__relation__.operator">
+        <option value=""></option>
+        <option value="<=">&lt;=</option>
+        <option value=">=">&gt;=</option>
+        <option value="=">=</option>
+        <option value="⊆">⊆</option>
+        <option value="subset_of">subset_of</option>
+      </select>
+    </label>
+    <br>
+    <label>
       Expression
       <input data-name="scenario.consistency_relations.__relation__.expression">
     </label>
@@ -37,8 +49,14 @@
     </label>
     <br>
     <label>
-      Description
-      <textarea data-name="scenario.consistency_relations.__relation__.description"></textarea>
+      UPR sigma
+      <textarea data-name="scenario.consistency_relations.__relation__.upr_sigma"></textarea>
     </label>
+    <br>
+    <label>
+      UPR description
+      <textarea data-name="scenario.consistency_relations.__relation__.upr_description"></textarea>
+    </label>
+    <br>
   </fieldset>
 </template>
