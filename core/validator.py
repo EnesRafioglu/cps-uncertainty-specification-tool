@@ -1,15 +1,20 @@
 import re
 
-
-MATLAB_IDENTIFIER_REGEX = r"^[A-Za-z][A-Za-z0-9_]*$"
-SCENARIO_ID_REGEX = r"^[a-z0-9_]+$"
-GENERIC_ID_REGEX = r"^[A-Za-z0-9_]+$"
-
-MATLAB_KEYWORDS = {
-   "break", "case", "catch", "classdef", "continue", "else", "elseif",
-   "end", "for", "function", "global", "if", "otherwise", "parfor",
-   "persistent", "return", "spmd", "switch", "try", "while",
-}
+from core.constants import (
+   CONTINUOUS_UNCERTAINTY_TYPES,
+   ELEMENT_REQUIRED_FIELDS,
+   GENERIC_ID_REGEX,
+   INTERVAL,
+   MATLAB_IDENTIFIER_REGEX,
+   MATLAB_KEYWORDS,
+   MODEL_REQUIRED_FIELDS,
+   PROBABILISTIC,
+   RECOMMENDED_CLASSIFICATION_FIELDS,
+   RECOMMENDED_RELATION_FIELDS,
+   RELATION_REQUIRED_FIELDS,
+   SCENARIO_ID_REGEX,
+   SCENARIO_REQUIRED_FIELDS,
+)
 
 MATLAB_IDENTIFIER_PATTERN = re.compile(MATLAB_IDENTIFIER_REGEX)
 SCENARIO_ID_PATTERN = re.compile(SCENARIO_ID_REGEX)
@@ -56,7 +61,7 @@ def check_structural_rules(scenario: dict) -> list:
 
 
 def check_scenario_identity(errors: list, scenario: dict):
-   missing_fields = missing_required_fields(scenario, ["scenario_id", "name"])
+   missing_fields = missing_required_fields(scenario, SCENARIO_REQUIRED_FIELDS)
    if missing_fields:
       errors.append(f"Scenario is missing the following required fields: {','.join(missing_fields)}")
       return
@@ -81,7 +86,8 @@ def check_model(
       pattern_label=f"Model {model_index} ID",
    )
 
-   if "name" not in model:
+   missing_fields = missing_required_fields(model, MODEL_REQUIRED_FIELDS)
+   if "name" in missing_fields:
       errors.append(f"Model {model_index} does not have a name")
 
    elements = model.get("elements", [])
@@ -101,7 +107,7 @@ def check_element(
    seen_matlab_symbols: set,
 ):
    element_label = f"Element {element_index} of model {model_index}"
-   missing_fields = missing_required_fields(element, ["id", "name", "symbol", "unit"])
+   missing_fields = missing_required_fields(element, ELEMENT_REQUIRED_FIELDS)
 
    if missing_fields:
       errors.append(f"{element_label} is missing the following required fields: {', '.join(missing_fields)}")
@@ -131,9 +137,9 @@ def check_uncertainty(errors: list, uncertainty: dict, model_index: int, element
    label = f"Element {element_index} of model {model_index}"
    uncertainty_type = uncertainty["type"]
 
-   if uncertainty_type == "interval":
+   if uncertainty_type == INTERVAL:
       check_interval_uncertainty(errors, uncertainty, label)
-   elif uncertainty_type == "probabilistic":
+   elif uncertainty_type == PROBABILISTIC:
       check_probabilistic_uncertainty(errors, uncertainty, label)
    else:
       check_binary_uncertainty(errors, uncertainty, label)
@@ -167,7 +173,7 @@ def check_relation(
    seen_relation_ids: set,
    seen_element_ids: set,
 ):
-   missing_fields = missing_required_fields(relation, ["id", "from_element_id", "to_element_id", "expression"])
+   missing_fields = missing_required_fields(relation, RELATION_REQUIRED_FIELDS)
    if missing_fields:
       errors.append(f"Relation {relation_index} is missing the following required fields: {', '.join(missing_fields)}")
 
@@ -248,7 +254,7 @@ def check_completeness_rules(scenario: dict) -> list:
 
    for i, relation in enumerate(scenario.get("consistency_relations", [])):
       missing_fields = [
-         field for field in ["upr_sigma", "upr_description"]
+         field for field in RECOMMENDED_RELATION_FIELDS
          if field not in relation
       ]
 
@@ -264,7 +270,7 @@ def check_completeness_rules(scenario: dict) -> list:
 
          classification = element.get("classification", {})
          missing_fields = [
-            field for field in ["development_phase", "reducibility_level"]
+            field for field in RECOMMENDED_CLASSIFICATION_FIELDS
             if field not in classification
          ]
 
@@ -290,7 +296,7 @@ def check_cross_field_rules(scenario: dict) -> list:
 
          if (
             classification.get("nature") == "Aleatory"
-            and uncertainty_type not in ["interval", "probabilistic"]
+            and uncertainty_type not in CONTINUOUS_UNCERTAINTY_TYPES
          ):
             ans.append(
                f"Element {j} of model {i} has nature Aleatory but uncertainty type is not interval or probabilistic"

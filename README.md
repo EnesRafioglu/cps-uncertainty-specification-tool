@@ -56,7 +56,7 @@ Structural errors block generation:
 - Interval uncertainty requires `min < max`.
 - Probabilistic uncertainty requires `mean`, `std`, and `std > 0`.
 - Binary uncertainty requires different `option_0` and `option_1`.
-- Consistency relations must have `id`, `from_element_id`, `to_element_id`, and `expression`.
+- Consistency relations must have `id`, `from_element_id`, `to_element_id`, `expression`, and `upr_type`.
 - Consistency relation IDs must match `^[A-Za-z0-9_]+$`.
 - Consistency relations must reference existing element IDs.
 

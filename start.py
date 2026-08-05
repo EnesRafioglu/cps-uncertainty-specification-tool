@@ -17,8 +17,7 @@ def index():
 
 @app.post("/api/validate")
 def validate_api():
-    scenario = build_scenario_from_form(request.form)
-    validation_result = validate_scenario(scenario)
+    _, validation_result = parse_and_validate_form(request.form)
 
     return jsonify({
         "validation_result": validation_result,
@@ -27,8 +26,7 @@ def validate_api():
 
 @app.post("/generate")
 def generate():
-    scenario = build_scenario_from_form(request.form)
-    validation_result = validate_scenario(scenario)
+    scenario, validation_result = parse_and_validate_form(request.form)
     if not validation_result["valid"]:
         return render_template(
             "generated.html",
@@ -43,6 +41,13 @@ def generate():
         generation_result=generation_result,
         validation_result=validation_result,
     )
+
+
+def parse_and_validate_form(form_data):
+    scenario = build_scenario_from_form(form_data)
+    validation_result = validate_scenario(scenario)
+
+    return scenario, validation_result
 
 
 if __name__ == "__main__":
