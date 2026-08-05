@@ -1,3 +1,5 @@
+CONTINUOUS_UNCERTAINTY_TYPES = {"interval", "probabilistic"}
+
 
 def generate_matlab_output(scenario: dict) -> str:
    lines = [
@@ -9,45 +11,23 @@ def generate_matlab_output(scenario: dict) -> str:
       "% - https://github.com/aalanwar/Logical-Zonotope for logical zonotopes: logicalZonotope(...)",
    ]
 
-   for model in scenario["models"]:
+   for model_index, model in enumerate(scenario["models"], start=1):
       lines.append(f"\n% Model ID: {model["id"]}")
       lines.append(f"% Model name: {model["name"]}")
 
+      continuous_symbols = []
+      binary_symbols = []
 
       for element in model["elements"]:
-         lines.append(f"\n% Element: {element["name"]}")
-         lines.append(f"% Symbol: {element["symbol"]}")
-         lines.append(f"% Unit: {element["unit"]}")
+         uncertainty_type = add_element_output(lines, element)
 
-         if "uncertainty" in element:
-            uncertainty = element["uncertainty"]
-            u_type = uncertainty["type"]
-            lines.append(f"% Uncertainty type: {u_type}\n")
-            if u_type == "interval":
-               mn, mx = uncertainty["min"], uncertainty["max"]
-               symbol = element["symbol"]
-               lines.append(f"{symbol}_min = {mn};")
-               lines.append(f"{symbol}_max = {mx};\n")
-               lines.extend(make_zonotope(symbol, f"({symbol}_min + {symbol}_max) / 2", f"({symbol}_max - {symbol}_min) / 2"))
-            elif u_type == "probabilistic":
-               mean, std = uncertainty["mean"], uncertainty["std"]
-               symbol = element["symbol"]
-               lines.append("% Probabilistic uncertainty is converted into a 95% confidence interval.")
-               lines.append(f"{symbol}_mean = {mean};")
-               lines.append(f"{symbol}_std = {std};")
-               lines.append(f"{symbol}_confidence_factor = 1.96;\n")
-               lines.extend(make_zonotope(symbol, f"{symbol}_mean", f"{symbol}_confidence_factor * {symbol}_std"))
-            else:
-               option_0, option_1 = uncertainty["option_0"], uncertainty["option_1"]
-               symbol = element["symbol"]
-               lines.append(f"% Options: 0 = {option_0}, 1 = {option_1}")
-               lines.extend(make_logical_zonotope(symbol))
+         if uncertainty_type in CONTINUOUS_UNCERTAINTY_TYPES:
+            continuous_symbols.append(element["symbol"])
+         elif uncertainty_type == "binary":
+            binary_symbols.append(element["symbol"])
 
-         elif "fixed_value" in element:
-            symbol = element["symbol"]
-            fixed_value = element["fixed_value"]
-            lines.append("% Fixed/reference value\n")
-            lines.append(f"{symbol} = {fixed_value};")
+      lines.extend(make_joint_continuous_zonotope(model_index, continuous_symbols))
+      lines.extend(make_joint_logical_zonotope(model_index, binary_symbols))
 
    if scenario.get("consistency_relations"):
       lines.append("\n%% Consistency relations")
@@ -58,6 +38,67 @@ def generate_matlab_output(scenario: dict) -> str:
          lines.append(f"% {relation_id} [{upr_type}]: {expression}")
 
    return "\n".join(lines)
+
+
+def add_element_output(lines: list, element: dict):
+   lines.append(f"\n% Element: {element["name"]}")
+   lines.append(f"% Symbol: {element["symbol"]}")
+   lines.append(f"% Unit: {element["unit"]}")
+
+   if "uncertainty" in element:
+      uncertainty = element["uncertainty"]
+      uncertainty_type = uncertainty["type"]
+      lines.append(f"% Uncertainty type: {uncertainty_type}\n")
+
+      if uncertainty_type == "interval":
+         lines.extend(make_interval_zonotope(element, uncertainty))
+      elif uncertainty_type == "probabilistic":
+         lines.extend(make_probabilistic_zonotope(element, uncertainty))
+      else:
+         lines.extend(make_binary_logical_zonotope(element, uncertainty))
+
+      return uncertainty_type
+
+   if "fixed_value" in element:
+      lines.extend(make_fixed_value(element))
+
+   return None
+
+
+def make_interval_zonotope(element: dict, uncertainty: dict) -> list:
+   symbol = element["symbol"]
+   return [
+      f"{symbol}_min = {uncertainty["min"]};",
+      f"{symbol}_max = {uncertainty["max"]};\n",
+      *make_zonotope(symbol, f"({symbol}_min + {symbol}_max) / 2", f"({symbol}_max - {symbol}_min) / 2"),
+   ]
+
+
+def make_probabilistic_zonotope(element: dict, uncertainty: dict) -> list:
+   symbol = element["symbol"]
+   return [
+      "% Probabilistic uncertainty is converted into a 95% confidence interval.",
+      f"{symbol}_mean = {uncertainty["mean"]};",
+      f"{symbol}_std = {uncertainty["std"]};",
+      f"{symbol}_confidence_factor = 1.96;\n",
+      *make_zonotope(symbol, f"{symbol}_mean", f"{symbol}_confidence_factor * {symbol}_std"),
+   ]
+
+
+def make_binary_logical_zonotope(element: dict, uncertainty: dict) -> list:
+   symbol = element["symbol"]
+   return [
+      f"% Options: 0 = {uncertainty["option_0"]}, 1 = {uncertainty["option_1"]}",
+      *make_logical_zonotope(symbol),
+   ]
+
+
+def make_fixed_value(element: dict) -> list:
+   symbol = element["symbol"]
+   return [
+      "% Fixed/reference value\n",
+      f"{symbol} = {element["fixed_value"]};",
+   ]
 
 
 def make_zonotope(symbol: str, center: str, generator: str) -> list:
@@ -73,4 +114,37 @@ def make_logical_zonotope(symbol: str) -> list:
       f"{symbol}_c_L = 0;",
       f"{symbol}_G_L = {{1}};",
       f"{symbol}_Z = logicalZonotope({symbol}_c_L, {symbol}_G_L);",
+   ]
+
+
+def make_joint_continuous_zonotope(model_index: int, symbols: list) -> list:
+   if len(symbols) <= 1:
+      return []
+
+   base_name = f"model_{model_index}_continuous"
+   center_entries = "; ".join(f"{symbol}_c" for symbol in symbols)
+   generator_entries = "; ".join(f"{symbol}_G" for symbol in symbols)
+
+   return [
+      f"\n% Joint continuous zonotope for model {model_index}",
+      f"% Dimension order: {', '.join(symbols)}",
+      f"{base_name}_c = [{center_entries}];",
+      f"{base_name}_G = diag([{generator_entries}]);",
+      f"{base_name}_Z = zonotope([{base_name}_c, {base_name}_G]);",
+   ]
+
+
+def make_joint_logical_zonotope(model_index: int, symbols: list) -> list:
+   if len(symbols) <= 1:
+      return []
+
+   base_name = f"model_{model_index}_binary"
+   dimension_count = len(symbols)
+
+   return [
+      f"\n% Joint logical zonotope for model {model_index}",
+      f"% Dimension order: {', '.join(symbols)}",
+      f"{base_name}_c_L = zeros({dimension_count}, 1);",
+      f"{base_name}_G_L = num2cell(logical(eye({dimension_count})), 1);",
+      f"{base_name}_Z = logicalZonotope({base_name}_c_L, {base_name}_G_L);",
    ]

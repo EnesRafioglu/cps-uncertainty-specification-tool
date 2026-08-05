@@ -74,7 +74,7 @@ Cross-field warnings allow generation:
 
 ## Generated output
 
-The generated page displays MATLAB text. Continuous uncertainty is emitted as `zonotope(...)`; binary uncertainty is emitted as `logicalZonotope(...)`.
+The generated page displays MATLAB text. Each uncertain element gets its own zonotope. If a model has multiple continuous uncertain elements, the generator also emits a model-level joint continuous `zonotope(...)`. If a model has multiple binary uncertain elements, it emits a separate model-level joint `logicalZonotope(...)`.
 
 Dependencies for running the MATLAB output:
 
