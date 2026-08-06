@@ -1,130 +1,314 @@
 {
-  "scenario_id": "scenario_demo_01",
-  "name": "Demo Scenario",
-  "description": "Example scenario showing interval, probabilistic, and binary uncertainty.",
+  "scenario_id": "warehouse_robot_01",
+  "name": "Autonomous Warehouse Robot",
+  "description": "Artificial scenario describing uncertainty in a warehouse robot that transports packages while monitoring motor temperature, battery state, perception quality, and controller mode.",
   "models": [
     {
-      "id": "M1",
+      "id": "thermal_model",
       "name": "Thermal Simulation Model",
       "type": "SimulationModel",
       "elements": [
         {
-          "id": "e1",
+          "id": "motor_temperature",
           "name": "Motor Temperature",
           "symbol": "T_motor",
           "unit": "degC",
-          "description": "Operating temperature of the motor.",
+          "description": "Predicted motor temperature during a loaded driving segment.",
           "uncertainty": {
             "type": "interval",
-            "source": "Thermal simulation",
-            "min": 102,
-            "max": 118
+            "source": "Thermal simulation sweep",
+            "min": 72,
+            "max": 91
           },
           "classification": {
             "development_phase": "Design-Time",
             "reducibility_level": "Partially Reducible",
             "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Thermal",
+            "component_type": "Physical",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "Deterministic+Continuous",
+            "level_type": "First-Level",
             "risk_type": "High",
-            "risk_scale": 75
+            "risk_scale": 82
           }
         },
         {
-          "id": "e2",
-          "name": "Maximum Motor Temperature",
-          "symbol": "T_max",
+          "id": "ambient_temperature",
+          "name": "Ambient Temperature",
+          "symbol": "T_ambient",
           "unit": "degC",
-          "description": "Safety threshold for motor temperature.",
-          "fixed_value": 110
-        }
-      ]
-    },
-    {
-      "id": "M2",
-      "name": "Sensor Performance Model",
-      "type": "SensorPerformanceModel",
-      "elements": [
-        {
-          "id": "e3",
-          "name": "LiDAR Quality",
-          "symbol": "q_lidar",
-          "unit": "score",
-          "description": "Quality score of LiDAR perception.",
+          "description": "Warehouse ambient temperature around the robot.",
           "uncertainty": {
             "type": "probabilistic",
-            "source": "Field measurements",
+            "source": "Historical warehouse measurements",
             "distribution": "gaussian",
-            "mean": 0.92,
-            "std": 0.03
+            "mean": 24,
+            "std": 2.5
           },
           "classification": {
             "development_phase": "Run-Time",
             "reducibility_level": "Partially Reducible",
             "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Thermal",
+            "component_type": "Physical",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "Probabilistic+Continuous",
+            "level_type": "First-Level",
             "risk_type": "Medium",
-            "risk_scale": 50
+            "risk_scale": 45
           }
         },
         {
-          "id": "e4",
-          "name": "Minimum LiDAR Quality",
-          "symbol": "q_min",
-          "unit": "score",
-          "description": "Minimum acceptable LiDAR quality.",
-          "fixed_value": 0.9
+          "id": "motor_temperature_limit",
+          "name": "Motor Temperature Limit",
+          "symbol": "T_limit",
+          "unit": "degC",
+          "description": "Fixed safety threshold for the motor temperature.",
+          "fixed_value": 95
         }
       ]
     },
     {
-      "id": "M3",
-      "name": "Software Architecture Model",
-      "type": "SoftwareArchitectureModel",
+      "id": "energy_model",
+      "name": "Battery Performance Model",
+      "type": "ComponentPerformanceModel",
       "elements": [
         {
-          "id": "e5",
-          "name": "Migration Decision",
-          "symbol": "b_migration",
-          "unit": "boolean",
-          "description": "Whether the system migrates to the merged architecture.",
+          "id": "battery_soc",
+          "name": "Battery State of Charge",
+          "symbol": "soc",
+          "unit": "percent",
+          "description": "Estimated battery state of charge before starting the delivery task.",
           "uncertainty": {
-            "type": "binary",
-            "source": "Architecture decision",
-            "option_0": "legacy_architecture",
-            "option_1": "merged_architecture"
+            "type": "probabilistic",
+            "source": "Battery estimator",
+            "distribution": "gaussian",
+            "mean": 68,
+            "std": 4
           },
           "classification": {
-            "development_phase": "Design-Time",
-            "reducibility_level": "Fully Reducible",
-            "nature": "Epistemic",
-            "risk_type": "Low",
-            "risk_scale": 30
+            "development_phase": "Run-Time",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Electrical",
+            "component_type": "Physical",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "Probabilistic+Continuous",
+            "level_type": "Second-Level",
+            "risk_type": "High",
+            "risk_scale": 76
           }
         },
         {
-          "id": "e6",
-          "name": "Merged Architecture",
-          "symbol": "a_merged",
+          "id": "payload_mass",
+          "name": "Payload Mass",
+          "symbol": "payload_mass",
+          "unit": "kg",
+          "description": "Mass of the carried package inferred from warehouse order data.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Order database range",
+            "min": 8,
+            "max": 15
+          },
+          "classification": {
+            "development_phase": "Run-Time",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Belief Uncertainty",
+            "atomic_component_type": "Mechanical",
+            "component_type": "Physical",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Transient",
+            "perspective_type": "Subjective",
+            "effect_type": "Deterministic+Continuous",
+            "level_type": "First-Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        },
+        {
+          "id": "minimum_soc",
+          "name": "Minimum Required State of Charge",
+          "symbol": "soc_min",
+          "unit": "percent",
+          "description": "Fixed minimum charge needed to safely finish the task.",
+          "fixed_value": 35
+        }
+      ]
+    },
+    {
+      "id": "perception_control_model",
+      "name": "Perception and Control Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "perception_quality",
+          "name": "Perception Quality",
+          "symbol": "q_perception",
+          "unit": "score",
+          "description": "Quality score of the robot perception pipeline in a cluttered aisle.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Validation dataset",
+            "distribution": "gaussian",
+            "mean": 0.88,
+            "std": 0.04
+          },
+          "classification": {
+            "development_phase": "Design-Time",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Cyber",
+            "component_type": "Cyber",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "Probabilistic+Continuous",
+            "level_type": "Second-Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        },
+        {
+          "id": "controller_mode",
+          "name": "Controller Mode",
+          "symbol": "controller_mode",
+          "unit": "mode",
+          "description": "Uncertain software mode selected by the controller.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Runtime controller decision",
+            "option_0": "nominal_mode",
+            "option_1": "cautious_mode"
+          },
+          "classification": {
+            "development_phase": "Run-Time",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "component_type": "Cyber",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System",
+            "pattern_type": "Transient",
+            "perspective_type": "Subjective",
+            "effect_type": "Non-Deterministic+Discrete",
+            "level_type": "Second-Level",
+            "risk_type": "Medium",
+            "risk_scale": 62
+          }
+        },
+        {
+          "id": "emergency_stop_available",
+          "name": "Emergency Stop Availability",
+          "symbol": "emergency_stop",
           "unit": "boolean",
-          "description": "Reference element representing the merged architecture."
+          "description": "Whether the emergency stop channel is available in the current configuration.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "System configuration",
+            "option_0": "not_available",
+            "option_1": "available"
+          },
+          "classification": {
+            "development_phase": "Run-Time",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Belief Uncertainty",
+            "atomic_component_type": "Cyber",
+            "component_type": "Cyber",
+            "system_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Model Structure",
+            "source_type": "Managed System",
+            "pattern_type": "Persistent",
+            "perspective_type": "Subjective",
+            "effect_type": "Non-Deterministic+Discrete",
+            "level_type": "Third-Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        },
+        {
+          "id": "minimum_perception_quality",
+          "name": "Minimum Perception Quality",
+          "symbol": "q_min",
+          "unit": "score",
+          "description": "Fixed minimum perception score required for autonomous motion.",
+          "fixed_value": 0.75
         }
       ]
     }
   ],
   "consistency_relations": [
     {
-      "id": "CR1",
-      "from_element_id": "e1",
-      "to_element_id": "e2",
-      "expression": "T_motor <= T_max",
+      "id": "cr_temperature_limit",
+      "from_element_id": "motor_temperature",
+      "to_element_id": "motor_temperature_limit",
+      "operator": "<=",
+      "expression": "T_motor <= T_limit",
       "upr_type": "constraint_based",
-      "description": "Motor temperature must stay below the safety threshold."
+      "upr_sigma": "sigma(x) = x if T_motor <= T_limit, else empty",
+      "upr_description": "The generated motor temperature must remain below the fixed safety threshold."
     },
     {
-      "id": "CR2",
-      "from_element_id": "e3",
-      "to_element_id": "e4",
-      "expression": "q_lidar >= q_min",
+      "id": "cr_soc_requirement",
+      "from_element_id": "battery_soc",
+      "to_element_id": "minimum_soc",
+      "operator": ">=",
+      "expression": "soc >= soc_min",
       "upr_type": "constraint_based",
-      "description": "LiDAR quality must stay above the required minimum."
+      "upr_sigma": "sigma(x) = x if soc >= soc_min, else empty",
+      "upr_description": "The battery state of charge must be sufficient for the task."
+    },
+    {
+      "id": "cr_perception_threshold",
+      "from_element_id": "perception_quality",
+      "to_element_id": "minimum_perception_quality",
+      "operator": ">=",
+      "expression": "q_perception >= q_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "sigma(x) = x if q_perception >= q_min, else empty",
+      "upr_description": "The perception score must be high enough for autonomous operation."
+    },
+    {
+      "id": "cr_emergency_guard",
+      "from_element_id": "controller_mode",
+      "to_element_id": "emergency_stop_available",
+      "operator": "",
+      "expression": "controller_mode = cautious_mode if emergency_stop = available",
+      "upr_type": "guarded",
+      "upr_sigma": "sigma(x) = guarded controller selection based on emergency_stop",
+      "upr_description": "The controller can choose cautious mode only when the emergency stop channel is available."
     }
   ]
 }
