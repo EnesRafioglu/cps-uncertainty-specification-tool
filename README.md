@@ -5,10 +5,10 @@ Small Flask prototype for entering uncertainty information for CPS scenarios, va
 ## Run locally
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python start.py
+python3 start.py
 ```
 
 Open:
@@ -22,6 +22,7 @@ http://127.0.0.1:5001
 - The UI accepts scenarios with multiple models.
 - Each model may contain fixed elements and uncertain elements.
 - Each uncertain element generates its own zonotope.
+- Models with multiple uncertain elements can also get model-level joint zonotopes.
 - Supported uncertainty types:
   - `interval`: `min`, `max`
   - `probabilistic`: `mean`, `std`
@@ -35,10 +36,10 @@ http://127.0.0.1:5001
 - Form fields use dot-separated names such as `scenario.models.0.elements.0.uncertainty.min`.
 - On validation, the browser posts the form to `/api/validate`.
 - Flask receives the submitted values through `request.form`.
-- `core/form_parser.py` converts the flat form keys into a nested Python dictionary. An example JSON schema can be found in `example.json`.
+- `core/form_parser.py` converts the flat form keys into a nested Python dictionary. An example parsed scenario can be found in `example.json`.
 - The validator returns errors/warnings as JSON.
 - If validation succeeds, the UI shows a **Generate zonotopes** button.
-- Generation submits the form to `/generate`, where Python parses it again and creates the MATLAB output.
+- Generation submits the form to `/generate`, where Python parses it again and displays the MATLAB output and parsed JSON.
 
 ## Validation checks
 
@@ -74,7 +75,7 @@ Cross-field warnings allow generation:
 
 ## Generated output
 
-The generated page displays MATLAB text. Each uncertain element gets its own zonotope. If a model has multiple continuous uncertain elements, the generator also emits a model-level joint continuous `zonotope(...)`. If a model has multiple binary uncertain elements, it emits a separate model-level joint `logicalZonotope(...)`.
+The generated page displays MATLAB text and the parsed JSON. Each uncertain element gets its own zonotope. If a model has multiple continuous uncertain elements, the generator also emits a model-level joint continuous `zonotope(...)`. If a model has multiple binary uncertain elements, it emits a separate model-level joint `logicalZonotope(...)`. Continuous and binary joint zonotopes are kept separate.
 
 Dependencies for running the MATLAB output:
 
