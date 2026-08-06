@@ -2,29 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Generated Zonotopes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
-    <h1>Generated output</h1>
+    <main class="page">
+      <header class="page-header">
+        <h1>Generated output</h1>
+      </header>
 
-    {% if generation_result %}
-      <h2>MATLAB</h2>
-      <pre>{{ generation_result }}</pre>
-    {% else %}
-      <p>Generation is blocked until structural errors are fixed.</p>
-      <ul>
-        {% for error in validation_result.structural_errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+      {% if generation_result %}
+        <section class="output-section">
+          <h2>MATLAB</h2>
+          <pre class="code-block">{{ generation_result }}</pre>
+        </section>
+      {% else %}
+        <section class="validation-output">
+          <p>Generation is blocked until structural errors are fixed.</p>
+          <ul>
+            {% for error in validation_result.structural_errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
 
-    <h2>JSON</h2>
-    <pre>{{ scenario_json }}</pre>
+      <section class="output-section">
+        <h2>JSON</h2>
+        <pre class="code-block">{{ scenario_json }}</pre>
+      </section>
 
-    <button type="button" onclick="history.back()">Go back</button>
-    <form method="get" action="{{ url_for('index') }}">
-      <button type="submit">Generate new scenario</button>
-    </form>
+      <div class="actions">
+        <button type="button" onclick="history.back()">Go back</button>
+        <form method="get" action="{{ url_for('index') }}">
+          <button type="submit">Generate new scenario</button>
+        </form>
+      </div>
+    </main>
   </body>
 </html>
