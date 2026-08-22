@@ -65,6 +65,12 @@ function addElement(model) {
   element.querySelector("[data-uncertainty-type]").addEventListener("change", () => {
     updateElementVisibility(element);
   });
+  element.querySelector("[data-atomic-component-type]").addEventListener("change", () => {
+    updateClassificationVisibility(element);
+  });
+  element.querySelector("[data-location-type]").addEventListener("change", () => {
+    updateClassificationVisibility(element);
+  });
 
   model.querySelector("[data-elements]").appendChild(element);
   updateElementVisibility(element);
@@ -137,6 +143,30 @@ function updateElementVisibility(element) {
       });
     });
   }
+
+  updateClassificationVisibility(element);
+}
+
+function updateClassificationVisibility(element) {
+  const classificationBlock = element.querySelector("[data-classification-block]");
+  const atomicComponentType = element.querySelector("[data-atomic-component-type]").value;
+  const locationType = element.querySelector("[data-location-type]").value;
+
+  element.querySelectorAll("[data-atomic-subtype]").forEach((fieldBlock) => {
+    const active = !classificationBlock.hidden && fieldBlock.dataset.atomicSubtype === atomicComponentType;
+    fieldBlock.hidden = !active;
+    fieldBlock.querySelectorAll("input, select, textarea").forEach((input) => {
+      input.disabled = !active;
+    });
+  });
+
+  element.querySelectorAll("[data-location-subtype]").forEach((fieldBlock) => {
+    const active = !classificationBlock.hidden && fieldBlock.dataset.locationSubtype === locationType;
+    fieldBlock.hidden = !active;
+    fieldBlock.querySelectorAll("input, select, textarea").forEach((input) => {
+      input.disabled = !active;
+    });
+  });
 }
 
 function renderValidationResult(result) {

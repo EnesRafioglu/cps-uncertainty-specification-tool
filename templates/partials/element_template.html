@@ -104,9 +104,9 @@
         Development phase
         <select data-name="scenario.models.__model__.elements.__element__.classification.development_phase">
           <option value=""></option>
-          <option value="Design-Time">Design-Time</option>
-          <option value="Run-Time">Run-Time</option>
-          <option value="Both">Both</option>
+          <option value="Requirement Level">Requirement Level</option>
+          <option value="Design-Time Level">Design-Time Level</option>
+          <option value="Run-Time Level">Run-Time Level</option>
         </select>
       </label>
       <br>
@@ -117,6 +117,7 @@
           <option value="Fully Reducible">Fully Reducible</option>
           <option value="Partially Reducible">Partially Reducible</option>
           <option value="Irreducible">Irreducible</option>
+          <option value="Unknown">Unknown</option>
         </select>
       </label>
       <br>
@@ -124,9 +125,8 @@
         Nature
         <select data-name="scenario.models.__model__.elements.__element__.classification.nature">
           <option value=""></option>
-          <option value="Epistemic">Epistemic</option>
           <option value="Aleatory">Aleatory</option>
-          <option value="Mixed">Mixed</option>
+          <option value="Epistemic">Epistemic</option>
         </select>
       </label>
       <br>
@@ -134,42 +134,54 @@
         Kind
         <select data-name="scenario.models.__model__.elements.__element__.classification.kind">
           <option value=""></option>
-          <option value="Measurement Uncertainty">Measurement Uncertainty</option>
-          <option value="Behavior Uncertainty">Behavior Uncertainty</option>
           <option value="Belief Uncertainty">Belief Uncertainty</option>
-          <option value="Other">Other</option>
+          <option value="Occurrence Uncertainty">Occurrence Uncertainty</option>
+          <option value="Spatiotemporal">Spatiotemporal</option>
+          <option value="Behavior Uncertainty">Behavior Uncertainty</option>
+          <option value="Measurement Uncertainty">Measurement Uncertainty</option>
         </select>
       </label>
       <br>
       <label>
         Atomic component type
-        <select data-name="scenario.models.__model__.elements.__element__.classification.atomic_component_type">
+        <select data-atomic-component-type data-name="scenario.models.__model__.elements.__element__.classification.atomic_component_type">
           <option value=""></option>
-          <option value="Thermal">Thermal</option>
-          <option value="Mechanical">Mechanical</option>
-          <option value="Electrical">Electrical</option>
           <option value="Cyber">Cyber</option>
-          <option value="Other">Other</option>
-        </select>
-      </label>
-      <br>
-      <label>
-        Component type
-        <select data-name="scenario.models.__model__.elements.__element__.classification.component_type">
-          <option value=""></option>
           <option value="Physical">Physical</option>
-          <option value="Cyber">Cyber</option>
-          <option value="Hybrid">Hybrid</option>
+          <option value="Platform">Platform</option>
+          <option value="Model">Model</option>
+        </select>
+      </label>
+      <br>
+      <label data-atomic-subtype="Physical" hidden>
+        Physical component type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.physical_component_type">
+          <option value=""></option>
+          <option value="Electrical">Electrical</option>
+          <option value="Hydraulic">Hydraulic</option>
+          <option value="Mechanical">Mechanical</option>
+          <option value="Thermal">Thermal</option>
+          <option value="Electromagnetic">Electromagnetic</option>
+        </select>
+      </label>
+      <br>
+      <label data-atomic-subtype="Model" hidden>
+        Model component type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.model_component_type">
+          <option value=""></option>
+          <option value="Machine Learning Model">Machine Learning Model</option>
+          <option value="Mathematical Model">Mathematical Model</option>
+          <option value="Software Architecture Model">Software Architecture Model</option>
         </select>
       </label>
       <br>
       <label>
-        System type
-        <select data-name="scenario.models.__model__.elements.__element__.classification.system_type">
+        Composite type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.composite_type">
           <option value=""></option>
           <option value="Cyber-Physical">Cyber-Physical</option>
-          <option value="Physical">Physical</option>
           <option value="Cyber">Cyber</option>
+          <option value="Physical">Physical</option>
         </select>
       </label>
       <br>
@@ -179,19 +191,30 @@
           <option value=""></option>
           <option value="Autonomous">Autonomous</option>
           <option value="Non-Autonomous">Non-Autonomous</option>
-          <option value="Semi-Autonomous">Semi-Autonomous</option>
         </select>
       </label>
       <br>
       <label>
         Location type
-        <select data-name="scenario.models.__model__.elements.__element__.classification.location_type">
+        <select data-location-type data-name="scenario.models.__model__.elements.__element__.classification.location_type">
           <option value=""></option>
           <option value="Parameter">Parameter</option>
-          <option value="Model Structure">Model Structure</option>
+          <option value="Outcome">Outcome</option>
           <option value="Inputs">Inputs</option>
+          <option value="Analysis">Analysis</option>
+          <option value="Context">Context</option>
           <option value="Decision Making">Decision Making</option>
-          <option value="Other">Other</option>
+          <option value="Model Uncertainty">Model Uncertainty</option>
+        </select>
+      </label>
+      <br>
+      <label data-location-subtype="Model Uncertainty" hidden>
+        Model uncertainty type
+        <select data-name="scenario.models.__model__.elements.__element__.classification.model_uncertainty_type">
+          <option value=""></option>
+          <option value="Model Input Uncertainty">Model Input Uncertainty</option>
+          <option value="Model Structure Uncertainty">Model Structure Uncertainty</option>
+          <option value="Model Outcome Uncertainty">Model Outcome Uncertainty</option>
         </select>
       </label>
       <br>
@@ -199,10 +222,13 @@
         Source type
         <select data-name="scenario.models.__model__.elements.__element__.classification.source_type">
           <option value=""></option>
-          <option value="Managed System">Managed System</option>
+          <option value="Model">Model</option>
+          <option value="Noise in sensing">Noise in sensing</option>
           <option value="Resources">Resources</option>
+          <option value="Goal/Objectives">Goal/Objectives</option>
           <option value="Environment">Environment</option>
-          <option value="Other">Other</option>
+          <option value="Human in the Loop">Human in the Loop</option>
+          <option value="Managed System Uncertainty">Managed System Uncertainty</option>
         </select>
       </label>
       <br>
@@ -210,9 +236,11 @@
         Pattern type
         <select data-name="scenario.models.__model__.elements.__element__.classification.pattern_type">
           <option value=""></option>
+          <option value="Periodic">Periodic</option>
           <option value="Persistent">Persistent</option>
-          <option value="Transient">Transient</option>
           <option value="Sporadic">Sporadic</option>
+          <option value="Transient">Transient</option>
+          <option value="Random">Random</option>
         </select>
       </label>
       <br>
@@ -220,8 +248,8 @@
         Perspective type
         <select data-name="scenario.models.__model__.elements.__element__.classification.perspective_type">
           <option value=""></option>
-          <option value="Objective">Objective</option>
           <option value="Subjective">Subjective</option>
+          <option value="Objective">Objective</option>
         </select>
       </label>
       <br>
@@ -229,10 +257,10 @@
         Effect type
         <select data-name="scenario.models.__model__.elements.__element__.classification.effect_type">
           <option value=""></option>
-          <option value="Probabilistic+Continuous">Probabilistic+Continuous</option>
-          <option value="Non-Deterministic+Discrete">Non-Deterministic+Discrete</option>
-          <option value="Deterministic+Continuous">Deterministic+Continuous</option>
-          <option value="Deterministic+Discrete">Deterministic+Discrete</option>
+          <option value="Stochastic/Probabilistic">Stochastic/Probabilistic</option>
+          <option value="Scenario/non-deterministic">Scenario/non-deterministic</option>
+          <option value="Continuous">Continuous</option>
+          <option value="Discrete">Discrete</option>
         </select>
       </label>
       <br>
@@ -240,9 +268,11 @@
         Level type
         <select data-name="scenario.models.__model__.elements.__element__.classification.level_type">
           <option value=""></option>
-          <option value="First-Level">First-Level</option>
-          <option value="Second-Level">Second-Level</option>
-          <option value="Third-Level">Third-Level</option>
+          <option value="0th Level">0th Level</option>
+          <option value="1st Level">1st Level</option>
+          <option value="2nd Level">2nd Level</option>
+          <option value="3rd Level">3rd Level</option>
+          <option value="4th Level">4th Level</option>
         </select>
       </label>
       <br>
@@ -250,9 +280,10 @@
         Risk type
         <select data-name="scenario.models.__model__.elements.__element__.classification.risk_type">
           <option value=""></option>
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
           <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Extreme">Extreme</option>
         </select>
       </label>
       <br>
