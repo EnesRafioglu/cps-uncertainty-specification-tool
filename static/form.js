@@ -100,6 +100,7 @@ function updateNames() {
     model.querySelectorAll("[data-name]").forEach((input) => {
       input.name = input.dataset.name.replaceAll("__model__", modelIndex);
     });
+    model.querySelector("[data-model-id]").placeholder = `m${modelIndex + 1}`;
 
     model.querySelectorAll("[data-element]").forEach((element, elementIndex) => {
       element.querySelectorAll("[data-name]").forEach((input) => {
@@ -107,6 +108,7 @@ function updateNames() {
           .replaceAll("__model__", modelIndex)
           .replaceAll("__element__", elementIndex);
       });
+      element.querySelector("[data-element-id]").placeholder = `m${modelIndex + 1}e${elementIndex + 1}`;
     });
   });
 
@@ -114,6 +116,7 @@ function updateNames() {
     relation.querySelectorAll("[data-name]").forEach((input) => {
       input.name = input.dataset.name.replaceAll("__relation__", relationIndex);
     });
+    relation.querySelector("[data-relation-id]").placeholder = `cr_${relationIndex + 1}`;
   });
 
   updateElementReferenceOptions();
