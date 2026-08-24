@@ -263,8 +263,51 @@ summary {
 }
 
 .validation-output p {
-  margin-top: 0;
   font-weight: 700;
+}
+
+.validation-card {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.validation-card h3 {
+  margin-top: 0;
+}
+
+.validation-card-structural {
+  border-color: #f3b8b2;
+  background: #fff7f5;
+}
+
+.validation-card-completeness {
+  border-color: #f4d38c;
+  background: #fffaf0;
+}
+
+.validation-card-cross-field {
+  border-color: #b8d4ff;
+  background: #f5f9ff;
+}
+
+.validation-message {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.validation-message-success {
+  border: 1px solid #a6d8bc;
+  background: #f2fbf5;
+  color: #05603a;
+}
+
+.validation-message-blocked {
+  border: 1px solid #f3b8b2;
+  background: #fff7f5;
+  color: var(--danger);
 }
 
 .validation-output ul {

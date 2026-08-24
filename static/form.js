@@ -276,13 +276,14 @@ function renderValidationResult(result) {
     && result.cross_field_warnings.length === 0
   ) {
     const message = document.createElement("p");
+    message.className = "validation-message validation-message-success";
     message.textContent = "No validation issues.";
     validationOutput.appendChild(message);
   }
 
-  appendIssueList("Structural errors", result.structural_errors);
-  appendIssueList("Completeness warnings", result.completeness_warnings);
-  appendIssueList("Cross-field warnings", result.cross_field_warnings);
+  appendIssueList("Structural errors", result.structural_errors, "structural");
+  appendIssueList("Completeness warnings", result.completeness_warnings, "completeness");
+  appendIssueList("Cross-field warnings", result.cross_field_warnings, "cross-field");
 
   if (result.valid) {
     const button = document.createElement("button");
@@ -292,6 +293,7 @@ function renderValidationResult(result) {
     validationOutput.appendChild(button);
   } else {
     const message = document.createElement("p");
+    message.className = "validation-message validation-message-blocked";
     message.textContent = "Generation is blocked until structural errors are fixed.";
     validationOutput.appendChild(message);
   }
@@ -307,16 +309,17 @@ function submitForGeneration() {
   scenarioForm.submit();
 }
 
-function appendIssueList(title, issues) {
+function appendIssueList(title, issues, kind) {
   if (issues.length === 0) {
     return;
   }
 
-  validationOutput.appendChild(createIssueList(title, issues));
+  validationOutput.appendChild(createIssueList(title, issues, kind));
 }
 
-function createIssueList(title, issues) {
+function createIssueList(title, issues, kind) {
   const section = document.createElement("section");
+  section.className = `validation-card validation-card-${kind}`;
   section.appendChild(createHeading(title, 3));
 
   const list = document.createElement("ul");
