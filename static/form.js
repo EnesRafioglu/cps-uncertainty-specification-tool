@@ -116,6 +116,7 @@ function updateNames() {
     });
   });
 
+  updateElementReferenceOptions();
   updateBlockTitles();
 }
 
@@ -132,7 +133,42 @@ function setupToggleBlock(block) {
 
 function handleFormEdit() {
   clearValidationOutput();
+  updateElementReferenceOptions();
   updateBlockTitles();
+}
+
+function updateElementReferenceOptions() {
+  const elementIds = getElementIds();
+
+  document.querySelectorAll("[data-element-reference]").forEach((select) => {
+    const selectedValue = select.value;
+    select.replaceChildren(createEmptyOption());
+
+    elementIds.forEach((elementId) => {
+      select.appendChild(new Option(elementId, elementId));
+    });
+
+    if (elementIds.includes(selectedValue)) {
+      select.value = selectedValue;
+    }
+  });
+}
+
+function getElementIds() {
+  const ids = [];
+
+  document.querySelectorAll("[data-element]").forEach((element) => {
+    const id = element.querySelector('input[name$=".id"]')?.value.trim();
+    if (id && !ids.includes(id)) {
+      ids.push(id);
+    }
+  });
+
+  return ids;
+}
+
+function createEmptyOption() {
+  return new Option("", "");
 }
 
 function updateBlockTitles() {
