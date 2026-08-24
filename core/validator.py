@@ -287,6 +287,9 @@ def check_completeness_rules(scenario: dict) -> list:
 def check_cross_field_rules(scenario: dict) -> list:
    ans = []
 
+   for i, relation in enumerate(scenario.get("consistency_relations", [])):
+      check_relation_endpoints(ans, relation, i)
+
    for i, model in enumerate(scenario.get("models", [])):
       for j, element in enumerate(model.get("elements", [])):
          if "uncertainty" not in element:
@@ -323,6 +326,16 @@ def check_cross_field_rules(scenario: dict) -> list:
          check_effect_type_consistency(ans, classification, uncertainty_type, i, j)
 
    return ans
+
+
+def check_relation_endpoints(warnings: list, relation: dict, relation_index: int):
+   from_element_id = relation.get("from_element_id")
+   to_element_id = relation.get("to_element_id")
+
+   if from_element_id and from_element_id == to_element_id:
+      warnings.append(
+         f"Relation {relation_index} references the same element as both source and target"
+      )
 
 
 def check_effect_type_consistency(
