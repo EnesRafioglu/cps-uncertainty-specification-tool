@@ -33,7 +33,7 @@
             "source_type": "Managed System Uncertainty",
             "pattern_type": "Transient",
             "perspective_type": "Objective",
-            "effect_type": "Continuous",
+            "effect_type": "continuous non-deterministic",
             "level_type": "1st Level",
             "risk_type": "High",
             "risk_scale": 82
@@ -65,7 +65,7 @@
             "source_type": "Environment",
             "pattern_type": "Persistent",
             "perspective_type": "Objective",
-            "effect_type": "Stochastic/Probabilistic",
+            "effect_type": "continuous probabilistic",
             "level_type": "1st Level",
             "risk_type": "Medium",
             "risk_scale": 45
@@ -112,7 +112,7 @@
             "source_type": "Managed System Uncertainty",
             "pattern_type": "Transient",
             "perspective_type": "Objective",
-            "effect_type": "Stochastic/Probabilistic",
+            "effect_type": "continuous probabilistic",
             "level_type": "2nd Level",
             "risk_type": "High",
             "risk_scale": 76
@@ -143,7 +143,7 @@
             "source_type": "Environment",
             "pattern_type": "Transient",
             "perspective_type": "Subjective",
-            "effect_type": "Continuous",
+            "effect_type": "continuous non-deterministic",
             "level_type": "1st Level",
             "risk_type": "Medium",
             "risk_scale": 55
@@ -189,7 +189,7 @@
             "source_type": "Managed System Uncertainty",
             "pattern_type": "Sporadic",
             "perspective_type": "Objective",
-            "effect_type": "Stochastic/Probabilistic",
+            "effect_type": "continuous probabilistic",
             "level_type": "2nd Level",
             "risk_type": "High",
             "risk_scale": 88
@@ -219,7 +219,7 @@
             "source_type": "Managed System Uncertainty",
             "pattern_type": "Transient",
             "perspective_type": "Subjective",
-            "effect_type": "Discrete",
+            "effect_type": "discrete non-deterministic",
             "level_type": "2nd Level",
             "risk_type": "Medium",
             "risk_scale": 62
@@ -250,7 +250,7 @@
             "source_type": "Managed System Uncertainty",
             "pattern_type": "Persistent",
             "perspective_type": "Subjective",
-            "effect_type": "Discrete",
+            "effect_type": "discrete non-deterministic",
             "level_type": "3rd Level",
             "risk_type": "High",
             "risk_scale": 90
