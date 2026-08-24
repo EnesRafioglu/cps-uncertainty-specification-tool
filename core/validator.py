@@ -3,6 +3,7 @@ import re
 from core.constants import (
    CONTINUOUS_UNCERTAINTY_TYPES,
    ELEMENT_REQUIRED_FIELDS,
+   EFFECT_TYPE_TO_UNCERTAINTY_TYPE,
    GENERIC_ID_REGEX,
    INTERVAL,
    MATLAB_IDENTIFIER_REGEX,
@@ -14,6 +15,7 @@ from core.constants import (
    RELATION_REQUIRED_FIELDS,
    SCENARIO_ID_REGEX,
    SCENARIO_REQUIRED_FIELDS,
+   UNSUPPORTED_EFFECT_TYPES,
 )
 
 MATLAB_IDENTIFIER_PATTERN = re.compile(MATLAB_IDENTIFIER_REGEX)
@@ -318,4 +320,32 @@ def check_cross_field_rules(scenario: dict) -> list:
                f"Element {j} of model {i} has risk type High but risk scale is below 70"
             )
 
+         check_effect_type_consistency(ans, classification, uncertainty_type, i, j)
+
    return ans
+
+
+def check_effect_type_consistency(
+   warnings: list,
+   classification: dict,
+   uncertainty_type: str,
+   model_index: int,
+   element_index: int,
+):
+   effect_type = classification.get("effect_type")
+   if not effect_type:
+      return
+
+   if effect_type in UNSUPPORTED_EFFECT_TYPES:
+      warnings.append(
+         f"Element {element_index} of model {model_index} has effect type {effect_type}, "
+         "but the current generator does not support a separate discrete probabilistic uncertainty representation"
+      )
+      return
+
+   expected_uncertainty_type = EFFECT_TYPE_TO_UNCERTAINTY_TYPE.get(effect_type)
+   if expected_uncertainty_type and uncertainty_type != expected_uncertainty_type:
+      warnings.append(
+         f"Element {element_index} of model {model_index} has effect type {effect_type}, "
+         f"but uncertainty type is {uncertainty_type}; expected {expected_uncertainty_type}"
+      )

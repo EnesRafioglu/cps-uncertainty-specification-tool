@@ -4,6 +4,16 @@ BINARY = "binary"
 
 CONTINUOUS_UNCERTAINTY_TYPES = {INTERVAL, PROBABILISTIC}
 
+EFFECT_TYPE_TO_UNCERTAINTY_TYPE = {
+   "continuous non-deterministic": INTERVAL,
+   "continuous probabilistic": PROBABILISTIC,
+   "discrete non-deterministic": BINARY,
+}
+
+UNSUPPORTED_EFFECT_TYPES = {
+   "discrete probabilistic",
+}
+
 SCENARIO_ID_REGEX = r"^[a-z0-9_]+$"
 GENERIC_ID_REGEX = r"^[A-Za-z0-9_]+$"
 MATLAB_IDENTIFIER_REGEX = r"^[A-Za-z][A-Za-z0-9_]*$"

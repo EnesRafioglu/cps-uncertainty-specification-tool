@@ -72,6 +72,8 @@ Cross-field warnings allow generation:
 - `nature = Aleatory` should use `interval` or `probabilistic` uncertainty.
 - `reducibility_level = Fully Reducible` should have `nature = Epistemic`.
 - `risk_type = High` should have `risk_scale >= 70`.
+- `effect_type` should match the selected uncertainty type: `continuous non-deterministic -> interval`, `continuous probabilistic -> probabilistic`, `discrete non-deterministic -> binary`.
+- `effect_type = discrete probabilistic` warns because the current generator has no separate discrete-probabilistic representation.
 
 ## Generated output
 
