@@ -82,6 +82,26 @@ label {
   font-weight: 700;
 }
 
+#scenario-form > br,
+[data-block-body] > br,
+[data-uncertainty-block] br,
+[data-fixed-block] br,
+details[data-classification-block] br {
+  display: none;
+}
+
+#scenario-form > label,
+[data-block-body] > label,
+[data-uncertainty-block] > label,
+[data-uncertainty-fields] > label,
+[data-fixed-block] > label,
+details[data-classification-block] > label {
+  display: inline-grid;
+  width: min(100%, 320px);
+  margin: 8px 12px 8px 0;
+  vertical-align: top;
+}
+
 input,
 select,
 textarea {
@@ -94,6 +114,15 @@ textarea {
   font: inherit;
   font-weight: 400;
   padding: 8px 10px;
+}
+
+#scenario-form > label input,
+#scenario-form > label select,
+#scenario-form > label textarea,
+[data-block-body] input,
+[data-block-body] select,
+[data-block-body] textarea {
+  width: 100%;
 }
 
 textarea {
@@ -144,13 +173,61 @@ fieldset {
   background: var(--surface);
 }
 
+fieldset.is-collapsed {
+  padding-bottom: 8px;
+}
+
 fieldset fieldset {
   background: var(--surface-muted);
 }
 
 legend {
-  padding: 0 8px;
+  padding: 0 4px;
   font-weight: 800;
+}
+
+legend [data-toggle-block] {
+  min-height: 28px;
+  border-color: var(--border-strong);
+  border-radius: 5px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 14px;
+  padding: 4px 9px;
+}
+
+legend [data-toggle-block]:hover {
+  border-color: var(--accent);
+  background: #eef4ff;
+  color: var(--accent);
+}
+
+[data-block-body] {
+  padding-top: 8px;
+}
+
+.block-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+[data-remove-model],
+[data-remove-element],
+[data-remove-relation] {
+  border-color: #d92d20;
+  background: var(--surface);
+  color: #b42318;
+}
+
+[data-remove-model]:hover,
+[data-remove-element]:hover,
+[data-remove-relation]:hover {
+  border-color: #b42318;
+  background: #fff1f0;
+  color: #912018;
 }
 
 details {
@@ -159,6 +236,11 @@ details {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
+}
+
+details[data-classification-block] {
+  display: block;
+  width: 100%;
 }
 
 summary {
@@ -225,5 +307,15 @@ summary {
   .validation-output,
   .output-section {
     padding: 14px;
+  }
+
+  #scenario-form > label,
+  [data-block-body] > label,
+  [data-uncertainty-block] > label,
+  [data-uncertainty-fields] > label,
+  [data-fixed-block] > label,
+  details[data-classification-block] > label {
+    width: 100%;
+    margin-right: 0;
   }
 }

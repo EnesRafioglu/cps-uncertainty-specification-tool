@@ -1,40 +1,45 @@
 <template id="model-template">
   <fieldset data-model>
-    <legend>Model</legend>
-    <button type="button" data-remove-model>Remove model</button>
-    <br>
-    <label>
-      Model ID
-      <input data-name="scenario.models.__model__.id">
-    </label>
-    <br>
-    <label>
-      Name
-      <input data-name="scenario.models.__model__.name">
-    </label>
-    <br>
-    <label>
-      Type
-      <select data-name="scenario.models.__model__.type">
-        <option value="SimulationModel">SimulationModel</option>
-        <option value="RequirementModel">RequirementModel</option>
-        <option value="CADGeometryModel">CADGeometryModel</option>
-        <option value="CADAssemblyModel">CADAssemblyModel</option>
-        <option value="PackagingModel">PackagingModel</option>
-        <option value="AssemblyModel">AssemblyModel</option>
-        <option value="AerodynamicSimulationModel">AerodynamicSimulationModel</option>
-        <option value="SoftwareArchitectureModel">SoftwareArchitectureModel</option>
-        <option value="SystemConfigurationModel">SystemConfigurationModel</option>
-        <option value="SensorPerformanceModel">SensorPerformanceModel</option>
-        <option value="PerceptionRequirementModel">PerceptionRequirementModel</option>
-        <option value="ComponentPerformanceModel">ComponentPerformanceModel</option>
-        <option value="VehicleValidationModel">VehicleValidationModel</option>
-        <option value="Other">Other</option>
-      </select>
-    </label>
+    <legend>
+      <button type="button" data-toggle-block aria-expanded="true">Model</button>
+    </legend>
+    <div data-block-body>
+      <label>
+        Model ID
+        <input data-name="scenario.models.__model__.id">
+      </label>
+      <br>
+      <label>
+        Name
+        <input data-name="scenario.models.__model__.name">
+      </label>
+      <br>
+      <label>
+        Type
+        <select data-name="scenario.models.__model__.type">
+          <option value="SimulationModel">SimulationModel</option>
+          <option value="RequirementModel">RequirementModel</option>
+          <option value="CADGeometryModel">CADGeometryModel</option>
+          <option value="CADAssemblyModel">CADAssemblyModel</option>
+          <option value="PackagingModel">PackagingModel</option>
+          <option value="AssemblyModel">AssemblyModel</option>
+          <option value="AerodynamicSimulationModel">AerodynamicSimulationModel</option>
+          <option value="SoftwareArchitectureModel">SoftwareArchitectureModel</option>
+          <option value="SystemConfigurationModel">SystemConfigurationModel</option>
+          <option value="SensorPerformanceModel">SensorPerformanceModel</option>
+          <option value="PerceptionRequirementModel">PerceptionRequirementModel</option>
+          <option value="ComponentPerformanceModel">ComponentPerformanceModel</option>
+          <option value="VehicleValidationModel">VehicleValidationModel</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
 
-    <h3>Elements</h3>
-    <div data-elements></div>
-    <button type="button" data-add-element>+ Add element</button>
+      <h3>Elements</h3>
+      <div data-elements></div>
+      <button type="button" data-add-element>+ Add element</button>
+      <div class="block-actions">
+        <button type="button" data-remove-model>Remove model</button>
+      </div>
+    </div>
   </fieldset>
 </template>

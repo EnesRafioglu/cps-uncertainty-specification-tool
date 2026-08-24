@@ -1,40 +1,41 @@
 <template id="element-template">
   <fieldset data-element>
-    <legend>Element</legend>
-    <button type="button" data-remove-element>Remove element</button>
-    <br>
-    <label>
-      Element ID
-      <input data-name="scenario.models.__model__.elements.__element__.id">
-    </label>
-    <br>
-    <label>
-      Name
-      <input data-name="scenario.models.__model__.elements.__element__.name">
-    </label>
-    <br>
-    <label>
-      Symbol
-      <input data-name="scenario.models.__model__.elements.__element__.symbol">
-    </label>
-    <br>
-    <label>
-      Unit
-      <input data-name="scenario.models.__model__.elements.__element__.unit">
-    </label>
-    <br>
-    <label>
-      Description
-      <textarea data-name="scenario.models.__model__.elements.__element__.description"></textarea>
-    </label>
-    <br>
-    <label>
-      Element kind
-      <select data-element-kind>
-        <option value="uncertain">Uncertain element</option>
-        <option value="fixed">Fixed/reference element</option>
-      </select>
-    </label>
+    <legend>
+      <button type="button" data-toggle-block aria-expanded="true">Element</button>
+    </legend>
+    <div data-block-body>
+      <label>
+        Element ID
+        <input data-name="scenario.models.__model__.elements.__element__.id">
+      </label>
+      <br>
+      <label>
+        Name
+        <input data-name="scenario.models.__model__.elements.__element__.name">
+      </label>
+      <br>
+      <label>
+        Symbol
+        <input data-name="scenario.models.__model__.elements.__element__.symbol">
+      </label>
+      <br>
+      <label>
+        Unit
+        <input data-name="scenario.models.__model__.elements.__element__.unit">
+      </label>
+      <br>
+      <label>
+        Description
+        <textarea data-name="scenario.models.__model__.elements.__element__.description"></textarea>
+      </label>
+      <br>
+      <label>
+        Element kind
+        <select data-element-kind>
+          <option value="uncertain">Uncertain element</option>
+          <option value="fixed">Fixed/reference element</option>
+        </select>
+      </label>
 
     <div data-uncertainty-block>
       <h4>Uncertainty</h4>
@@ -292,5 +293,9 @@
         <input data-name="scenario.models.__model__.elements.__element__.classification.risk_scale" type="number" min="0" max="100">
       </label>
     </details>
+    <div class="block-actions">
+      <button type="button" data-remove-element>Remove element</button>
+    </div>
+    </div>
   </fieldset>
 </template>

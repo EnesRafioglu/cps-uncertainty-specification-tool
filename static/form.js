@@ -15,8 +15,8 @@ document.querySelector("#add-relation").addEventListener("click", () => {
   updateNames();
 });
 
-scenarioForm.addEventListener("input", clearValidationOutput);
-scenarioForm.addEventListener("change", clearValidationOutput);
+scenarioForm.addEventListener("input", handleFormEdit);
+scenarioForm.addEventListener("change", handleFormEdit);
 
 scenarioForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -33,6 +33,8 @@ scenarioForm.addEventListener("submit", async (event) => {
 function addModel() {
   const node = document.querySelector("#model-template").content.cloneNode(true);
   const model = node.querySelector("[data-model]");
+
+  setupToggleBlock(model);
 
   model.querySelector("[data-remove-model]").addEventListener("click", () => {
     clearValidationOutput();
@@ -52,6 +54,8 @@ function addModel() {
 function addElement(model) {
   const node = document.querySelector("#element-template").content.cloneNode(true);
   const element = node.querySelector("[data-element]");
+
+  setupToggleBlock(element);
 
   element.querySelector("[data-remove-element]").addEventListener("click", () => {
     clearValidationOutput();
@@ -79,6 +83,8 @@ function addElement(model) {
 function addRelation() {
   const node = document.querySelector("#relation-template").content.cloneNode(true);
   const relation = node.querySelector("[data-relation]");
+
+  setupToggleBlock(relation);
 
   relation.querySelector("[data-remove-relation]").addEventListener("click", () => {
     clearValidationOutput();
@@ -109,6 +115,60 @@ function updateNames() {
       input.name = input.dataset.name.replaceAll("__relation__", relationIndex);
     });
   });
+
+  updateBlockTitles();
+}
+
+function setupToggleBlock(block) {
+  const button = block.querySelector("legend [data-toggle-block]");
+  const body = block.querySelector("[data-block-body]");
+
+  button.addEventListener("click", () => {
+    body.hidden = !body.hidden;
+    button.setAttribute("aria-expanded", String(!body.hidden));
+    updateBlockTitles();
+  });
+}
+
+function handleFormEdit() {
+  clearValidationOutput();
+  updateBlockTitles();
+}
+
+function updateBlockTitles() {
+  document.querySelectorAll("[data-model]").forEach((model, modelIndex) => {
+    const modelName = getValue(model, `scenario.models.${modelIndex}.name`);
+    const modelId = getValue(model, `scenario.models.${modelIndex}.id`);
+    setBlockTitle(model, `Model ${modelIndex + 1}${formatSummary(modelName || modelId)}`);
+
+    model.querySelectorAll("[data-element]").forEach((element, elementIndex) => {
+      const elementName = getValue(element, `scenario.models.${modelIndex}.elements.${elementIndex}.name`);
+      const symbol = getValue(element, `scenario.models.${modelIndex}.elements.${elementIndex}.symbol`);
+      const elementId = getValue(element, `scenario.models.${modelIndex}.elements.${elementIndex}.id`);
+      setBlockTitle(element, `Element ${elementIndex + 1}${formatSummary(elementName || symbol || elementId)}`);
+    });
+  });
+
+  document.querySelectorAll("[data-relation]").forEach((relation, relationIndex) => {
+    const relationId = getValue(relation, `scenario.consistency_relations.${relationIndex}.id`);
+    setBlockTitle(relation, `Consistency relation ${relationIndex + 1}${formatSummary(relationId)}`);
+  });
+}
+
+function setBlockTitle(block, title) {
+  const button = block.querySelector("legend [data-toggle-block]");
+  const body = block.querySelector("[data-block-body]");
+  const marker = body.hidden ? "> " : "v ";
+  block.classList.toggle("is-collapsed", body.hidden);
+  button.textContent = marker + title;
+}
+
+function getValue(container, name) {
+  return container.querySelector(`[name="${name}"]`)?.value.trim() || "";
+}
+
+function formatSummary(value) {
+  return value ? `: ${value}` : "";
 }
 
 function updateElementVisibility(element) {
