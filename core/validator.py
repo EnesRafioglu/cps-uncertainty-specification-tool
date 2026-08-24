@@ -79,22 +79,24 @@ def check_model(
    seen_element_ids: set,
    seen_matlab_symbols: set,
 ):
+   model_label = format_model_label(model_index)
+
    check_unique_id(
       errors,
       value=model.get("id"),
       seen_ids=seen_model_ids,
-      missing_message=f"Model {model_index} does not have an ID",
-      duplicate_message=f"Model {model_index} does not have a unique ID",
-      pattern_label=f"Model {model_index} ID",
+      missing_message=f"{model_label} does not have an ID",
+      duplicate_message=f"{model_label} does not have a unique ID",
+      pattern_label=f"{model_label} ID",
    )
 
    missing_fields = missing_required_fields(model, MODEL_REQUIRED_FIELDS)
    if "name" in missing_fields:
-      errors.append(f"Model {model_index} does not have a name")
+      errors.append(f"{model_label} does not have a name")
 
    elements = model.get("elements", [])
    if not elements:
-      errors.append(f"Model {model_index} does not have any elements")
+      errors.append(f"{model_label} does not have any elements")
 
    for element_index, element in enumerate(elements):
       check_element(errors, element, model_index, element_index, seen_element_ids, seen_matlab_symbols)
@@ -108,7 +110,7 @@ def check_element(
    seen_element_ids: set,
    seen_matlab_symbols: set,
 ):
-   element_label = f"Element {element_index} of model {model_index}"
+   element_label = format_element_label(model_index, element_index)
    missing_fields = missing_required_fields(element, ELEMENT_REQUIRED_FIELDS)
 
    if missing_fields:
@@ -136,7 +138,7 @@ def check_element(
 
 
 def check_uncertainty(errors: list, uncertainty: dict, model_index: int, element_index: int):
-   label = f"Element {element_index} of model {model_index}"
+   label = format_element_label(model_index, element_index)
    uncertainty_type = uncertainty["type"]
 
    if uncertainty_type == INTERVAL:
@@ -175,18 +177,19 @@ def check_relation(
    seen_relation_ids: set,
    seen_element_ids: set,
 ):
+   relation_label = format_relation_label(relation_index)
    missing_fields = missing_required_fields(relation, RELATION_REQUIRED_FIELDS)
    if missing_fields:
-      errors.append(f"Relation {relation_index} is missing the following required fields: {', '.join(missing_fields)}")
+      errors.append(f"{relation_label} is missing the following required fields: {', '.join(missing_fields)}")
 
    if "id" in relation:
       check_unique_id(
          errors,
          value=relation["id"],
          seen_ids=seen_relation_ids,
-         missing_message=f"Relation {relation_index} does not have an ID",
-         duplicate_message=f"Relation {relation_index} does not have a unique ID",
-         pattern_label=f"Relation {relation_index} ID",
+         missing_message=f"{relation_label} does not have an ID",
+         duplicate_message=f"{relation_label} does not have a unique ID",
+         pattern_label=f"{relation_label} ID",
       )
 
    references_invalid_element = (
@@ -194,7 +197,7 @@ def check_relation(
       or "to_element_id" in relation and relation["to_element_id"] not in seen_element_ids
    )
    if references_invalid_element:
-      errors.append(f"Relation {relation_index} does not reference valid elements")
+      errors.append(f"{relation_label} does not reference valid elements")
 
 
 def check_unique_id(
@@ -218,6 +221,18 @@ def check_unique_id(
 
 def missing_required_fields(data: dict, fields: list) -> list:
    return [field for field in fields if field not in data]
+
+
+def format_model_label(model_index: int) -> str:
+   return f"Model {model_index + 1}"
+
+
+def format_element_label(model_index: int, element_index: int) -> str:
+   return f"Element {element_index + 1} of model {model_index + 1}"
+
+
+def format_relation_label(relation_index: int) -> str:
+   return f"Relation {relation_index + 1}"
 
 
 def add_pattern_error(errors: list, label: str, value, pattern, pattern_text: str):
@@ -262,7 +277,7 @@ def check_completeness_rules(scenario: dict) -> list:
 
       if missing_fields:
          ans.append(
-            f"Relation {i} is missing recommended UPR fields: {', '.join(missing_fields)}"
+            f"{format_relation_label(i)} is missing recommended UPR fields: {', '.join(missing_fields)}"
          )
 
    for i, model in enumerate(scenario.get("models", [])):
@@ -278,7 +293,7 @@ def check_completeness_rules(scenario: dict) -> list:
 
          if missing_fields:
             ans.append(
-               f"Element {j} of model {i} is missing recommended classification fields: {', '.join(missing_fields)}"
+               f"{format_element_label(i, j)} is missing recommended classification fields: {', '.join(missing_fields)}"
             )
 
    return ans
@@ -304,7 +319,7 @@ def check_cross_field_rules(scenario: dict) -> list:
             and uncertainty_type not in CONTINUOUS_UNCERTAINTY_TYPES
          ):
             ans.append(
-               f"Element {j} of model {i} has nature Aleatory but uncertainty type is not interval or probabilistic"
+               f"{format_element_label(i, j)} has nature Aleatory but uncertainty type is not interval or probabilistic"
             )
 
          if (
@@ -312,7 +327,7 @@ def check_cross_field_rules(scenario: dict) -> list:
             and classification.get("nature") != "Epistemic"
          ):
             ans.append(
-               f"Element {j} of model {i} is Fully Reducible but nature is not Epistemic"
+               f"{format_element_label(i, j)} is Fully Reducible but nature is not Epistemic"
             )
 
          if (
@@ -320,7 +335,7 @@ def check_cross_field_rules(scenario: dict) -> list:
             and classification.get("risk_scale", 0) < 70
          ):
             ans.append(
-               f"Element {j} of model {i} has risk type High but risk scale is below 70"
+               f"{format_element_label(i, j)} has risk type High but risk scale is below 70"
             )
 
          check_effect_type_consistency(ans, classification, uncertainty_type, i, j)
@@ -334,7 +349,7 @@ def check_relation_endpoints(warnings: list, relation: dict, relation_index: int
 
    if from_element_id and from_element_id == to_element_id:
       warnings.append(
-         f"Relation {relation_index} references the same element as both source and target"
+         f"{format_relation_label(relation_index)} references the same element as both source and target"
       )
 
 
@@ -351,7 +366,7 @@ def check_effect_type_consistency(
 
    if effect_type in UNSUPPORTED_EFFECT_TYPES:
       warnings.append(
-         f"Element {element_index} of model {model_index} has effect type {effect_type}, "
+         f"{format_element_label(model_index, element_index)} has effect type {effect_type}, "
          "but the current generator does not support a separate discrete probabilistic uncertainty representation"
       )
       return
@@ -359,6 +374,6 @@ def check_effect_type_consistency(
    expected_uncertainty_type = EFFECT_TYPE_TO_UNCERTAINTY_TYPE.get(effect_type)
    if expected_uncertainty_type and uncertainty_type != expected_uncertainty_type:
       warnings.append(
-         f"Element {element_index} of model {model_index} has effect type {effect_type}, "
+         f"{format_element_label(model_index, element_index)} has effect type {effect_type}, "
          f"but uncertainty type is {uncertainty_type}; expected {expected_uncertainty_type}"
       )
