@@ -12,6 +12,12 @@
         <h1>CPS Uncertainty Specification Tool</h1>
       </header>
 
+      <section class="example-panel">
+        <h2>Examples</h2>
+        <p>Load an example scenario from a real CPS domain. Validation and generation will not run automatically.</p>
+        <div id="example-buttons" class="example-buttons"></div>
+      </section>
+
       {% include "partials/scenario_form.html" %}
 
       <section id="validation-output" class="validation-output" hidden></section>
@@ -21,6 +27,7 @@
     {% include "partials/element_template.html" %}
     {% include "partials/relation_template.html" %}
 
+    <script src="{{ url_for('static', filename='example_scenarios.js') }}"></script>
     <script src="{{ url_for('static', filename='form.js') }}"></script>
   </body>
 </html>

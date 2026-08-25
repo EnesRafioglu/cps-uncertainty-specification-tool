@@ -2,6 +2,9 @@ const modelsContainer = document.querySelector("#models");
 const relationsContainer = document.querySelector("#relations");
 const scenarioForm = document.querySelector("#scenario-form");
 const validationOutput = document.querySelector("#validation-output");
+const exampleButtonsContainer = document.querySelector("#example-buttons");
+
+renderExampleButtons();
 
 document.querySelector("#add-model").addEventListener("click", () => {
   clearValidationOutput();
@@ -29,6 +32,109 @@ scenarioForm.addEventListener("submit", async (event) => {
 
   renderValidationResult(data.validation_result);
 });
+
+function renderExampleButtons() {
+  if (!exampleButtonsContainer || !window.EXAMPLE_SCENARIOS) {
+    return;
+  }
+
+  window.EXAMPLE_SCENARIOS.forEach((example) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = example.label;
+    button.title = example.source;
+    button.addEventListener("click", () => {
+      loadScenarioExample(example.scenario);
+    });
+    exampleButtonsContainer.appendChild(button);
+  });
+}
+
+function loadScenarioExample(scenario) {
+  clearValidationOutput();
+  scenarioForm.reset();
+  modelsContainer.replaceChildren();
+  relationsContainer.replaceChildren();
+
+  scenario.models.forEach((modelData) => {
+    addModel();
+    const model = modelsContainer.lastElementChild;
+
+    modelData.elements.forEach(() => {
+      addElement(model);
+    });
+  });
+
+  (scenario.consistency_relations || []).forEach(() => {
+    addRelation();
+  });
+
+  updateNames();
+  setScenarioValues(scenario);
+  updateElementReferenceOptions();
+  setRelationValues(scenario.consistency_relations || []);
+  updateBlockTitles();
+}
+
+function setScenarioValues(scenario) {
+  setFieldValue("scenario.scenario_id", scenario.scenario_id);
+  setFieldValue("scenario.name", scenario.name);
+  setFieldValue("scenario.description", scenario.description);
+
+  scenario.models.forEach((modelData, modelIndex) => {
+    setObjectFields(`scenario.models.${modelIndex}`, modelData, ["elements"]);
+
+    modelData.elements.forEach((elementData, elementIndex) => {
+      const element = getElementBlock(modelIndex, elementIndex);
+      element.querySelector("[data-element-kind]").value = elementData.uncertainty ? "uncertain" : "fixed";
+      if (elementData.uncertainty?.type) {
+        element.querySelector("[data-uncertainty-type]").value = elementData.uncertainty.type;
+      }
+
+      updateElementVisibility(element);
+      setObjectFields(`scenario.models.${modelIndex}.elements.${elementIndex}`, elementData);
+      updateElementVisibility(element);
+    });
+  });
+}
+
+function setRelationValues(relations) {
+  relations.forEach((relationData, relationIndex) => {
+    setObjectFields(`scenario.consistency_relations.${relationIndex}`, relationData);
+  });
+}
+
+function getElementBlock(modelIndex, elementIndex) {
+  return modelsContainer
+    .querySelectorAll("[data-model]")
+    [modelIndex]
+    .querySelectorAll("[data-element]")
+    [elementIndex];
+}
+
+function setObjectFields(prefix, data, skippedKeys = []) {
+  Object.entries(data).forEach(([key, value]) => {
+    if (skippedKeys.includes(key)) {
+      return;
+    }
+
+    const fieldName = `${prefix}.${key}`;
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      setObjectFields(fieldName, value);
+    } else {
+      setFieldValue(fieldName, value);
+    }
+  });
+}
+
+function setFieldValue(fieldName, value) {
+  const input = scenarioForm.elements.namedItem(fieldName);
+  if (!input || value === undefined || value === null) {
+    return;
+  }
+
+  input.value = String(value);
+}
 
 function addModel() {
   const node = document.querySelector("#model-template").content.cloneNode(true);
