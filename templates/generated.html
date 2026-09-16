@@ -14,8 +14,11 @@
 
       {% if generation_result %}
         <section class="output-section">
-          <h2>MATLAB</h2>
-          <pre class="code-block">{{ generation_result }}</pre>
+          <div class="output-heading">
+            <h2>MATLAB</h2>
+            <button type="button" data-copy-target="matlab-output">Copy</button>
+          </div>
+          <pre id="matlab-output" class="code-block">{{ generation_result }}</pre>
         </section>
       {% else %}
         <section class="validation-output">
@@ -29,8 +32,11 @@
       {% endif %}
 
       <section class="output-section">
-        <h2>JSON</h2>
-        <pre class="code-block">{{ scenario_json }}</pre>
+        <div class="output-heading">
+          <h2>JSON</h2>
+          <button type="button" data-copy-target="json-output">Copy</button>
+        </div>
+        <pre id="json-output" class="code-block">{{ scenario_json }}</pre>
       </section>
 
       <div class="actions">
@@ -40,5 +46,37 @@
         </form>
       </div>
     </main>
+
+    <script>
+      document.querySelectorAll("[data-copy-target]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const target = document.getElementById(button.dataset.copyTarget);
+          await copyText(target.textContent);
+
+          const originalText = button.textContent;
+          button.textContent = "Copied";
+          setTimeout(() => {
+            button.textContent = originalText;
+          }, 1200);
+        });
+      });
+
+      async function copyText(text) {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "absolute";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+    </script>
   </body>
 </html>

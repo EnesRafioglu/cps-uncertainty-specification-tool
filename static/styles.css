@@ -338,6 +338,23 @@ summary {
   padding-left: 22px;
 }
 
+.output-heading {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.output-heading h2 {
+  margin: 0;
+}
+
+.output-heading button {
+  min-height: 32px;
+  padding: 5px 11px;
+}
+
 .code-block {
   max-height: 560px;
   overflow: auto;
