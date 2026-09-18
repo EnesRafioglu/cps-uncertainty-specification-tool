@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_10_chlorine_dose_parametric",
+  "name": "Chlorine Concentration from Dosing Rate (Parametric)",
+  "description": "Residual chlorine concentration is parametrically computed from the dosing rate: C_Cl = R_dose × η_mix / Q_flow. Dosing rate uncertainty propagates through this affine formula to concentration uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Chemical Dosing Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Sodium Hypochlorite Dosing Rate",
+          "symbol": "R_dose",
+          "unit": "mL/min",
+          "description": "Dosing pump volumetric flow rate of sodium hypochlorite solution.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT dataset: reduced dosing rate for lower chlorine demand periods",
+            "min": 5,
+            "max": 9
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Water Quality Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Residual Chlorine",
+          "symbol": "C_max",
+          "unit": "mg/L",
+          "description": "WHO drinking water guideline: maximum residual chlorine",
+          "fixed_value": 0.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "C_Cl = R_dose * eta_mix * rho / Q_flow <= C_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(R) = F·R + f; F = η_mix×ρ/Q_flow ≈ 0.0496 (mg/L)/(mL/min), f=0",
+      "upr_description": "Parametric UPR: chlorine concentration CZ is affine image of dosing rate CZ through C=R×η/Q formula."
+    }
+  ]
+}

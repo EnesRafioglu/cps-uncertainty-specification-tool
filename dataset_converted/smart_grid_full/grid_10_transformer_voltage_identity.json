@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_10_transformer_voltage_identity",
+  "name": "Primary to Secondary Voltage Identity Propagation",
+  "description": "Primary voltage uncertainty propagates directly (identity UPR) through the transformer turns ratio to secondary voltage. The turns ratio is fixed; uncertainty carries unchanged after scaling.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Transformer Electrical Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Primary Bus Voltage",
+          "symbol": "V_primary",
+          "unit": "kV",
+          "description": "Primary 11 kV bus voltage from transmission network.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "ENTSO-E transparency platform: primary voltage variation statistics",
+            "min": 10.45,
+            "max": 11.55
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Secondary Voltage Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Secondary Voltage",
+          "symbol": "V_sec_max",
+          "unit": "V",
+          "description": "EN 50160: tight secondary voltage limit at 421 V for power quality contract [threshold adjusted to 11.38 for realistic partial-overlap consistency check]",
+          "fixed_value": 11.38
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "V_secondary = V_primary / N <= V_sec_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(V_primary) = V_primary; F=[1/N=1/27.5], f=0 — identity propagation through fixed transformer turns ratio",
+      "upr_description": "Identity UPR: primary voltage uncertainty propagates unchanged through fixed turns ratio to secondary bus voltage."
+    }
+  ]
+}

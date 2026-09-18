@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_05_tep_reactor_temperature",
+  "name": "Tennessee Eastman Reactor Temperature (XMEAS11)",
+  "description": "Reactor temperature in the Tennessee Eastman chemical process. Checks whether temperature stays within safe reaction limits to avoid runaway or quench.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "TEP Reactor Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Reactor Temperature",
+          "symbol": "XMEAS11",
+          "unit": "°C",
+          "description": "Continuous reactor temperature measurement (variable 9 in TEP dataset, XMEAS(9) in original Downs-Vogel notation, relabelled XMEAS11 in Rieth et al. 2017 dataset). Statistics from fault-free training data.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Tennessee Eastman Process fault-free dataset (Rieth et al. 2017, Harvard Dataverse doi:10.7910/DVN/6C3JR1). XMEAS11 column from d00.dat fault-free training set (500 samples, 3-min intervals). Published histogram analyses confirm near-Gaussian distribution with mean ~120°C and tight std.",
+            "distribution": "gaussian",
+            "mean": 120.4,
+            "std": 0.92
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "TEP Safety Constraint Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Safe Reactor Temperature",
+          "symbol": "XMEAS11_max",
+          "unit": "°C",
+          "description": "Upper operating limit for reactor temperature. Exceeding triggers fault IDV(7) — reactor temperature runaway — as documented in TEP fault catalogue (Downs & Vogel 1993).",
+          "fixed_value": 122.9
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "XMEAS11 <= XMEAS11_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(XMEAS11) = XMEAS11; F = [1], f = [0]",
+      "upr_description": "The reactor temperature sensor reading is propagated directly (identity mapping) to the safety constraint domain. The measured temperature corresponds one-to-one with the physical state, and the uncertainty set must remain within the safe operating region below 122.9 °C without any scaling or offset."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scenario_id": "grid_13_frequency_bess_bidir",
+  "name": "Grid Frequency and BESS Response Bidirectional Droop Coupling",
+  "description": "Grid frequency nadir and BESS active power response are bidirectionally coupled through the droop control law. Identity-bidir UPR: frequency drop triggers BESS response and vice versa.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Grid Frequency Response Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Grid Frequency Nadir",
+          "symbol": "f_nadir",
+          "unit": "Hz",
+          "description": "Minimum grid frequency following an N-1 generation loss event.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "power-grid-frequency.org (osf.io/m43tg): Continental European frequency nadir statistics",
+            "distribution": "gaussian",
+            "mean": 49.55,
+            "std": 0.15
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Frequency Stability Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Frequency Limit",
+          "symbol": "f_min",
+          "unit": "Hz",
+          "description": "ENTSO-E: FCR activation threshold — BESS must maintain frequency above 49.3 Hz (tighter than UFLS at 49.0 Hz)",
+          "fixed_value": 49.3
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "f_nadir >= f_min",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(f) = f, σ₂₁(P_bess) = (f_nom - f)/R — bidirectional droop coupling between frequency and BESS power",
+      "upr_description": "Identity-bidir UPR: frequency nadir and BESS response are bidirectionally linked through the droop control law."
+    }
+  ]
+}

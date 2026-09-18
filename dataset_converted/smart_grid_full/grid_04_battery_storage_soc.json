@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_04_battery_storage_soc",
+  "name": "Grid Battery Storage State of Charge",
+  "description": "State of charge of a grid-connected BESS after a frequency regulation event. Checks whether minimum SoC for next event is preserved.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "BESS Energy Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "SoC After Frequency Regulation",
+          "symbol": "SoC_post",
+          "unit": "%",
+          "description": "Battery SoC remaining after delivering primary frequency response. Uncertain due to event magnitude and duration.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Frequency event statistics from 5-year ENTSO-E data",
+            "min": 18,
+            "max": 35
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "BESS Operational Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum SoC for Service Availability",
+          "symbol": "SoC_min",
+          "unit": "%",
+          "description": "Minimum SoC required to remain available for next regulation event",
+          "fixed_value": 20
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "SoC_post >= SoC_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(SoC_post) = SoC_post if SoC_post >= SoC_min, else ∅",
+      "upr_description": "The minimum service availability SoC guards the post-event SoC uncertainty set; values below 20% make the BESS unavailable for the next regulation event."
+    }
+  ]
+}

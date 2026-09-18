@@ -1,0 +1,73 @@
+{
+  "scenario_id": "auto_11_motor_speed_wheel",
+  "name": "Motor Speed to Wheel Speed Identity",
+  "description": "Motor shaft speed uncertainty propagates directly through the fixed gear ratio to wheel speed. Identity UPR: uncertainty unchanged after fixed scaling.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Motor Speed Sensor Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Motor Angular Speed",
+          "symbol": "omega_motor",
+          "unit": "RPM",
+          "description": "Motor shaft speed measured by hall-effect sensor.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "KaRaceIng hall-effect sensor at high-speed overtake condition",
+            "distribution": "gaussian",
+            "mean": 11000,
+            "std": 8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "ABS Controller Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Wheel Speed Input",
+          "symbol": "omega_wheel_max",
+          "unit": "RPM",
+          "description": "ABS controller: maximum wheel speed input at high-speed overtake condition",
+          "fixed_value": 2910
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "omega_wheel = omega_motor / 3.8 <= omega_wheel_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(ω_motor) = ω_motor; F = [1/3.8], f = 0 — uncertainty propagates unchanged through fixed gear ratio",
+      "upr_description": "Identity UPR: motor speed uncertainty propagates unchanged through the fixed gear ratio to the wheel speed model."
+    }
+  ]
+}

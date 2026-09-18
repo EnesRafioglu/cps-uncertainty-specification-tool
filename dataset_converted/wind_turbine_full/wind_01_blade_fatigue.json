@@ -1,0 +1,73 @@
+{
+  "scenario_id": "wind_01_blade_fatigue",
+  "name": "Blade Fatigue Life",
+  "description": "Composite blade fatigue life under variable wind loading. Checks whether predicted fatigue cycles exceed the minimum required service life.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Structural Fatigue Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Remaining Fatigue Life",
+          "symbol": "N_fatigue",
+          "unit": "cycles",
+          "description": "Number of load cycles before blade failure. Uncertain due to material variability and wind load spectrum.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Material testing and load spectrum analysis",
+            "distribution": "gaussian",
+            "mean": 2500000,
+            "std": 180000
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Certification Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Required Fatigue Life",
+          "symbol": "N_min",
+          "unit": "cycles",
+          "description": "IEC 61400-1 design lifetime requirement (20 years at rated operation)",
+          "fixed_value": 2000000
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "N_fatigue >= N_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(N_fatigue) = N_fatigue if N_fatigue >= N_min, else ∅",
+      "upr_description": "The IEC 61400-1 design lifetime requirement guards the fatigue life uncertainty set; values below 2,000,000 cycles indicate premature blade failure risk."
+    }
+  ]
+}

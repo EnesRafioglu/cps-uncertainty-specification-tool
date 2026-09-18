@@ -1,0 +1,123 @@
+{
+  "scenario_id": "med_09_pressure_volume_coupled",
+  "name": "Ventilator Peak Pressure and Tidal Volume — Compliance Coupling",
+  "description": "Peak airway pressure and tidal volume are coupled through lung compliance: stiffer lungs produce higher pressure for the same volume, creating a negative correlation.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Patient Respiratory Mechanics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Airway Pressure",
+          "symbol": "P_peak",
+          "unit": "cmH2O",
+          "description": "Peak inspiratory pressure. Negatively correlated with tidal volume through compliance.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PhysioNet VitalDB: ventilated ICU patients",
+            "distribution": "gaussian",
+            "mean": 24.0,
+            "std": 3.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 92
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Delivered Tidal Volume",
+          "symbol": "V_T",
+          "unit": "mL",
+          "description": "Tidal volume per breath. Negatively correlated with P_peak through lung compliance.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PhysioNet VitalDB: ventilated ICU patients, 70 kg reference",
+            "distribution": "gaussian",
+            "mean": 420.0,
+            "std": 40.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Protective Ventilation Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Maximum Airway Pressure",
+          "symbol": "P_max",
+          "unit": "cmH2O",
+          "description": "ARDS Network: P_peak ≤ 30 cmH₂O",
+          "fixed_value": 30.0
+        },
+        {
+          "id": "e4",
+          "name": "Maximum Tidal Volume",
+          "symbol": "V_max",
+          "unit": "mL",
+          "description": "ARDSNet: V_T ≤ 7 mL/kg IBW (70 kg = 490 mL)",
+          "fixed_value": 490.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": "<=",
+      "expression": "P_peak <= P_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(P_peak) = P_peak if P_peak <= P_max, else ∅",
+      "upr_description": "Safety constraint on pressure dimension of 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": "<=",
+      "expression": "V_T <= V_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(V_T) = V_T if V_T <= V_max, else ∅",
+      "upr_description": "Safety constraint on volume dimension of 2D CZ."
+    }
+  ]
+}

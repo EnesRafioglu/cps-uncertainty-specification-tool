@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_05_facade_u_value",
+  "name": "Facade Thermal Transmittance",
+  "description": "U-value of the building envelope after construction. Checks whether thermal performance meets energy code.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Building Envelope Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "As-Built Facade U-Value",
+          "symbol": "U_facade",
+          "unit": "W/(m2·K)",
+          "description": "Actual thermal transmittance after construction. Uncertain due to insulation installation quality.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "In-situ heat flux measurements from three reference buildings",
+            "min": 0.17,
+            "max": 0.24
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Resources",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Energy Code Compliance Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Energy Code U-Value Limit",
+          "symbol": "U_max",
+          "unit": "W/(m2·K)",
+          "description": "GEG 2023 (German Energy Efficiency Act) maximum facade U-value",
+          "fixed_value": 0.2
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "U_facade <= U_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(U_facade) = U_facade if U_facade <= U_max, else ∅",
+      "upr_description": "The GEG 2023 regulatory limit guards the as-built U-value uncertainty set; only transmittances at or below 0.20 W/(m²·K) remain compliant."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_13_tank_flow_bidir",
+  "name": "Tank Level and Inlet Flow Bidirectional Pump Coupling",
+  "description": "SWaT tank LIT101 and inlet flow FIT101 are bidirectionally coupled through PLC pump switching: low level activates pump (high flow), high level deactivates pump (low flow). Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Stage 1 Physical Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Tank T101 Water Level",
+          "symbol": "LIT101",
+          "unit": "mm",
+          "description": "Water level in raw water tank, coupled to inlet flow through pump switching.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "SWaT dataset normal operation (iTrust SUTD): LIT101 over 7-day run at 1 Hz",
+            "distribution": "gaussian",
+            "mean": 525,
+            "std": 148
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Tank Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Safe Tank Level",
+          "symbol": "LIT101_max",
+          "unit": "mm",
+          "description": "SWaT high-level alarm setpoint for pump speed reduction (mm) — conservative threshold",
+          "fixed_value": 600
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "LIT101 <= LIT101_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(LIT101) = LIT101, σ₂₁(FIT101) = f(LIT101) — bidirectional coupling through PLC pump switching",
+      "upr_description": "Identity-bidir UPR: tank level and inlet flow are bidirectionally coupled through pump switching logic."
+    }
+  ]
+}

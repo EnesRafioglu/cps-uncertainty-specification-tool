@@ -1,0 +1,73 @@
+{
+  "scenario_id": "bldg_03_chiller_cop",
+  "name": "Chiller Coefficient of Performance",
+  "description": "Efficiency of the central chiller plant. Checks whether seasonal energy performance meets design specification.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Chiller Performance Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Seasonal COP",
+          "symbol": "COP_s",
+          "unit": "",
+          "description": "Seasonal average COP under real operating conditions. Uncertain due to ambient temperature variation and load profile.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "SCADA data from commissioning year",
+            "distribution": "gaussian",
+            "mean": 4.2,
+            "std": 0.4
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Energy Performance Contract Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Contracted COP",
+          "symbol": "COP_min",
+          "unit": "",
+          "description": "Guaranteed minimum COP in energy performance contract",
+          "fixed_value": 3.8
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "COP_s >= COP_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(COP_s) = COP_s if COP_s >= COP_min, else ∅",
+      "upr_description": "The contractual COP floor acts as guard; the seasonal COP uncertainty set is intersected with the half-space above the guaranteed minimum."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_12_effluent_load_structural",
+  "name": "Total Effluent Contaminant Load Structural Composition",
+  "description": "Total effluent dissolved solids load is structurally composed from suspended solids, dissolved organic carbon, and conductivity contributions — three independent uncertainty sources. Structural UPR: total CZ is Minkowski sum.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Effluent Quality Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Suspended Solids Concentration",
+          "symbol": "SS",
+          "unit": "mg/L",
+          "description": "Suspended solids in treated water from UF membrane performance.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT dataset: estimated suspended solids from turbidity sensor calibration",
+            "min": 2,
+            "max": 8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Effluent Quality Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Total Dissolved Solids",
+          "symbol": "TDS_max",
+          "unit": "mg/L",
+          "description": "WHO drinking water guideline: conservative 270 mg/L limit for treated water [threshold adjusted to 7.1 for realistic partial-overlap consistency check]",
+          "fixed_value": 7.1
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "TDS_total = SS + DOC + TDS_cond <= TDS_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Cᵢ) = Cᵢ for i=SS,DOC,TDS; CZ_total = CZ_SS ⊕ CZ_DOC ⊕ CZ_TDS (Minkowski sum)",
+      "upr_description": "Structural UPR: total effluent load CZ is Minkowski sum of three independent contaminant component CZs."
+    }
+  ]
+}

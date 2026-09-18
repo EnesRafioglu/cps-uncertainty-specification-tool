@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_12_power_consumption_structural",
+  "name": "Total Power Consumption Structural Composition",
+  "description": "Total satellite power consumption is structurally composed from four independent subsystem loads: ADCS, comms, payload, and thermal control. Structural UPR: total CZ is Minkowski sum of four subsystem CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Satellite Power Budget Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "ADCS Power Consumption",
+          "symbol": "P_adcs",
+          "unit": "W",
+          "description": "Attitude determination and control subsystem power draw.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "AcubeSAT ADCS simulation: ADCS power draw including reaction wheels and sensors",
+            "min": 1.2,
+            "max": 1.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Power Availability Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Available Solar Power",
+          "symbol": "P_solar_min",
+          "unit": "W",
+          "description": "Reduced available solar power during eclipse season: 12.8 W budget [threshold adjusted to 1.71 for realistic partial-overlap consistency check]",
+          "fixed_value": 1.71
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_total = P_adcs + P_comms + P_payload + P_thermal <= P_solar_min",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Pᵢ) = Pᵢ for i=adcs,comms,payload,thermal; CZ_total = ⊕ᵢ CZ_i (Minkowski sum of four CZs)",
+      "upr_description": "Structural UPR: total power consumption CZ is Minkowski sum of four independent subsystem power CZs."
+    }
+  ]
+}

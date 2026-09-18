@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_15_brake_system_variant",
+  "name": "Brake System Variant Selection (Disambiguation)",
+  "description": "Two braking configurations: electrodynamic (ED) braking (lower wear, uncertain force at low speed) and friction braking (constant force). Disambiguation UPR selects the appropriate braking force CZ based on speed range.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Brake System Configuration",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "ED Brake Force (High Speed)",
+          "symbol": "F_ed",
+          "unit": "kN",
+          "description": "Electrodynamic braking force available above 30 km/h.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "EN 14531 braking calculations: electrodynamic brake characteristic above 30 km/h",
+            "min": 85,
+            "max": 115
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Braking Performance Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Braking Force",
+          "symbol": "F_min",
+          "unit": "kN",
+          "description": "EN 14531: minimum braking force for deceleration performance requirement",
+          "fixed_value": 70
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "F_brake = Select{F_ed, F_friction}[speed] >= F_min",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(speed) = Select{CZ_ed=[100±15], CZ_friction=[90±15]} — both checked against F_min=70 kN",
+      "upr_description": "Disambiguation UPR: braking mode selected by speed regime; both ED and friction brake variants must meet minimum force."
+    }
+  ]
+}

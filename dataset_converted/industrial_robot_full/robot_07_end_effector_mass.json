@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_07_end_effector_mass",
+  "name": "End-Effector Mass Tolerance",
+  "description": "As-built mass of a custom end-effector. Checks whether it stays within the robot payload rating.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "End-Effector CAD Model",
+      "type": "CADGeometryModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "End-Effector As-Built Mass",
+          "symbol": "m_eff",
+          "unit": "kg",
+          "description": "Actual mass including tooling, cables, and sensors. Uncertain due to manufacturing and cable routing variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Mass budget calculation with component tolerances",
+            "min": 4.8,
+            "max": 5.6
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Resources",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Robot Payload Specification",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Robot Rated Payload",
+          "symbol": "m_payload",
+          "unit": "kg",
+          "description": "Maximum payload including end-effector mass per robot specification",
+          "fixed_value": 5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "min(m_lightweight, m_standard) <= m_payload",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(Z_m_eff) = Select{F_lightweight·Z ⊕ {f_lightweight}, F_standard·Z ⊕ {f_standard}} where F=1, select option whose mass interval ⊆ [0, m_payload]",
+      "upr_description": "Two gripper design variants (lightweight and standard) produce overlapping but distinct mass uncertainty sets. The disambiguation mapping selects the variant whose uncertainty set falls within the robot payload limit of 5.0 kg. If both exceed the limit, the system is inconsistent and redesign is required."
+    }
+  ]
+}

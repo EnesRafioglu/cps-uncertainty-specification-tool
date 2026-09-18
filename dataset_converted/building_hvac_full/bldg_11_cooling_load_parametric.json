@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_11_cooling_load_parametric",
+  "name": "Cooling Load from Solar and Occupancy (Parametric)",
+  "description": "Zone peak cooling load Q_cool = Q_occ + g_solar × A × E_solar is parametrically computed from occupancy heat gain and solar irradiance. Parametric UPR maps occupancy CZ to total cooling load CZ.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Zone Thermal Load Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Occupancy Internal Heat Gain",
+          "symbol": "Q_occ",
+          "unit": "W",
+          "description": "Sensible heat gain from occupants based on attendance uncertainty.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "ASHRAE 55: peak occupancy 18 persons at 60W/person on hot summer day",
+            "min": 1100,
+            "max": 1500
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Low",
+            "risk_scale": 45
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "HVAC Sizing Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Cooling Capacity",
+          "symbol": "Q_max",
+          "unit": "W",
+          "description": "HVAC plant sizing: maximum available cooling capacity for this zone (W)",
+          "fixed_value": 2150
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "Q_cool = Q_occ + 1800 <= Q_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(Q_occ) = F·Q_occ + f; F=1, f=Q_solar=1800 (peak summer solar gain)",
+      "upr_description": "Parametric UPR: total cooling load is affine function of occupancy gain with fixed solar gain offset."
+    }
+  ]
+}

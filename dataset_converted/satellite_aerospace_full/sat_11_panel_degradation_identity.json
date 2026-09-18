@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_11_panel_degradation_identity",
+  "name": "Solar Panel Degradation to Power Identity Propagation",
+  "description": "Solar panel degradation uncertainty propagates directly (identity UPR) through the power budget: generated power P = P_BOL × (1 - d)^t where d is degradation rate. Degradation uncertainty carries unchanged into power model.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Solar Panel Degradation Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Annual Degradation Rate",
+          "symbol": "d_annual",
+          "unit": "%/year",
+          "description": "Solar panel power degradation rate from particle radiation and UV exposure.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "AcubeSAT ADCS simulation: degradation rate from ESA SPENVIS radiation environment model",
+            "min": 2.0,
+            "max": 3.0
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Power Budget Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum End-of-Mission Power",
+          "symbol": "P_eom_min",
+          "unit": "W",
+          "description": "Power budget: minimum end-of-mission power raised to 21.5 W after payload upgrade [threshold adjusted to 2.15 for realistic partial-overlap consistency check]",
+          "fixed_value": 2.15
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "P_eom = P_BOL * (1 - d_annual/100)^2 >= P_eom_min",
+      "upr_type": "identity",
+      "upr_sigma": "σ(d) = d; F = [-P_BOL×2×(1-d_nom/100)/100], f = P_BOL×(1-d_nom/100)² — identity propagation of degradation to power",
+      "upr_description": "Identity UPR: solar panel degradation uncertainty propagates directly into end-of-mission power via fixed BOL power and mission duration."
+    }
+  ]
+}

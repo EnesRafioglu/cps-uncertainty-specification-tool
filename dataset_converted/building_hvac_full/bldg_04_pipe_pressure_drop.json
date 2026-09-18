@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_04_pipe_pressure_drop",
+  "name": "Hydraulic Pipe Pressure Drop",
+  "description": "Pressure drop in the heating circuit distribution pipe. Checks whether pump head is sufficient.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Hydraulic Network Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Total Pipe Pressure Drop",
+          "symbol": "dP_pipe",
+          "unit": "Pa",
+          "description": "Pressure loss in the distribution ring at design flow. Uncertain due to pipe roughness and fitting tolerances.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Hydraulic calculation with tolerance ranges",
+            "min": 18500,
+            "max": 23000
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Pump Selection Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Available Pump Head",
+          "symbol": "H_pump",
+          "unit": "Pa",
+          "description": "Rated pump head at design operating point",
+          "fixed_value": 22000
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "dP_pipe <= H_pump",
+      "upr_type": "identity",
+      "upr_sigma": "σ(dP_pipe) = dP_pipe; F = [1], f = [0]",
+      "upr_description": "The pipe pressure drop is transferred directly (identity mapping) to the pump head domain, where it must not exceed the available pump head. No scaling or offset is applied; the units and magnitude are identical."
+    }
+  ]
+}

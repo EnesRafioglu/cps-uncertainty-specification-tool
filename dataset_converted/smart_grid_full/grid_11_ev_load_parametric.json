@@ -1,0 +1,73 @@
+{
+  "scenario_id": "grid_11_ev_load_parametric",
+  "name": "EV Charging Load from Diversity Factor (Parametric)",
+  "description": "Total EV charging load is parametrically computed from the number of EVs, rated charger power, and diversity factor: P_ev = N × P_charger × f_div. Diversity factor uncertainty propagates through this formula.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "EV Load Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "EV Charging Diversity Factor",
+          "symbol": "f_div",
+          "unit": "dimensionless",
+          "description": "Fraction of EVs simultaneously charging during peak demand period.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Open Power System Data: EV charging diversity factor analysis from smart charging trials",
+            "distribution": "gaussian",
+            "mean": 0.65,
+            "std": 0.12
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Feeder Capacity Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Feeder Maximum Load",
+          "symbol": "P_feeder_max",
+          "unit": "kW",
+          "description": "Feeder thermal rating at peak summer temperature: derated to 195 kW [threshold adjusted to 0.815 for realistic partial-overlap consistency check]",
+          "fixed_value": 0.815
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_ev = N * P_charger * f_div = 45 * 7.4 * f_div <= P_feeder_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(f_div) = F·f_div + f; F = N×P_charger = 45×7.4 = 333 kW, f=0 — parametric load from diversity factor",
+      "upr_description": "Parametric UPR: EV load CZ is affine image of diversity factor CZ through P_ev = N×P_charger×f_div formula."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_13_bp_systolic_diastolic",
+  "name": "Systolic and Diastolic BP Bidirectional Coupling",
+  "description": "Systolic and diastolic blood pressure are bidirectionally coupled through pulse pressure and mean arterial pressure: uncertainty in one propagates to the other. Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Haemodynamic Monitoring Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Systolic Blood Pressure",
+          "symbol": "P_sys",
+          "unit": "mmHg",
+          "description": "Systolic arterial blood pressure from arterial line.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PhysioNet MIMIC-IV: ICU systolic BP from arterial line monitoring",
+            "distribution": "gaussian",
+            "mean": 128,
+            "std": 12
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Haemodynamic Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Systolic BP Alert Threshold",
+          "symbol": "P_sys_max",
+          "unit": "mmHg",
+          "description": "AHA hypertensive urgency threshold",
+          "fixed_value": 160
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_sys <= P_sys_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(P_sys) = P_sys, σ₂₁(P_dia) = (3×MAP − P_sys)/2 — bidirectional coupling through MAP formula",
+      "upr_description": "Identity-bidir UPR: systolic and diastolic BP are bidirectionally coupled through haemodynamic MAP relationship."
+    }
+  ]
+}

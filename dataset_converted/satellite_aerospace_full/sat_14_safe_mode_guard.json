@@ -1,0 +1,71 @@
+{
+  "scenario_id": "sat_14_safe_mode_guard",
+  "name": "Safe Mode Transition Guarded Activation",
+  "description": "When the on-board computer detects a critical fault (b_fault=1), the satellite transitions to safe mode, disabling non-essential payloads. Guarded UPR: power reduction applies only when b_fault=1.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "On-board Software Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Critical Fault Flag",
+          "symbol": "b_fault",
+          "unit": "dimensionless",
+          "description": "Binary flag: 0=nominal operation, 1=critical fault — safe mode required.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "AcubeSAT on-board software fault management system",
+            "option_0": "nominal operation — all subsystems active",
+            "option_1": "critical fault — safe mode, payload disabled"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Safe Mode Power Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Safe Mode Power Budget",
+          "symbol": "P_safe_max",
+          "unit": "W",
+          "description": "Safe mode power budget: minimum subsystems only",
+          "fixed_value": 5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_fault=1 => P_total = P_safe <= P_safe_max",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(P) = P_safe if b_fault=1, else P_nominal; guard activates safe mode power reduction when fault detected",
+      "upr_description": "Guarded UPR: safe mode power reduction applies only when critical fault flag b_fault=1 is active."
+    }
+  ]
+}

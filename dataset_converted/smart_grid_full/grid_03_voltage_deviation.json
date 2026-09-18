@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_03_voltage_deviation",
+  "name": "Bus Voltage Deviation",
+  "description": "Voltage at a low-voltage bus with high PV penetration. Checks whether voltage quality standards are met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Voltage Regulation Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Bus Voltage Magnitude",
+          "symbol": "V_bus",
+          "unit": "pu",
+          "description": "Steady-state bus voltage at maximum PV generation and minimum load. Uncertain due to cloud cover intermittency.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Quasi-static time-series simulation with irradiance data",
+            "min": 0.98,
+            "max": 1.08
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Power Quality Standard Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Voltage",
+          "symbol": "V_max",
+          "unit": "pu",
+          "description": "EN 50160 upper voltage limit for LV distribution networks",
+          "fixed_value": 1.1
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "V_bus <= V_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(V_bus) = V_bus if V_bus <= V_max, else ∅",
+      "upr_description": "The EN 50160 overvoltage limit guards the bus voltage uncertainty set; voltages above 1.10 pu damage equipment and force inverter disconnection."
+    }
+  ]
+}

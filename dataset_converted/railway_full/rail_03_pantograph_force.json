@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_03_pantograph_force",
+  "name": "Pantograph Contact Force",
+  "description": "Dynamic contact force between pantograph and overhead catenary wire. Checks whether current collection quality is maintained.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Pantograph-Catenary Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Dynamic Contact Force",
+          "symbol": "F_contact",
+          "unit": "N",
+          "description": "Dynamic uplift force during high-speed running. Uncertain due to wind, catenary wave speed, and stagger variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "EN 50367 pantograph-catenary simulation",
+            "min": 55,
+            "max": 195
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Current Collection Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Dynamic Contact Force",
+          "symbol": "F_max",
+          "unit": "N",
+          "description": "EN 50367 maximum contact force for 200 km/h operation",
+          "fixed_value": 180
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "F_contact <= F_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(F_contact) = F_contact if F_contact <= F_max, else ∅",
+      "upr_description": "The EN 50367 contact force limit guards the pantograph force uncertainty set; forces above 180 N cause excessive catenary wire wear."
+    }
+  ]
+}

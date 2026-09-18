@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_11_reactor_separator_identity",
+  "name": "Reactor Temperature to Separator Identity Propagation",
+  "description": "TEP reactor temperature uncertainty propagates directly (identity UPR) into the separator model: separator temperature tracks reactor temperature with a fixed offset. Uncertainty carries unchanged.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "TEP Reactor Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Reactor Temperature",
+          "symbol": "XMEAS11",
+          "unit": "°C",
+          "description": "TEP reactor temperature from thermocouple measurements.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "TEP fault-free dataset (doi:10.7910/DVN/6C3JR1): XMEAS11 during normal operation",
+            "distribution": "gaussian",
+            "mean": 120.4,
+            "std": 0.92
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Separator Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Separator Temperature",
+          "symbol": "T_sep_max",
+          "unit": "°C",
+          "description": "TEP separator temperature safety limit",
+          "fixed_value": 115
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_sep = XMEAS11 - 8 <= T_sep_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(T_reactor) = T_reactor; F=[1], f=-8 — identity propagation through fixed heat exchanger temperature offset",
+      "upr_description": "Identity UPR: reactor temperature uncertainty propagates unchanged (minus fixed HX offset) into separator model."
+    }
+  ]
+}

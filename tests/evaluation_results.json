@@ -1,0 +1,46 @@
+{
+  "corpus": {
+    "scenarios": 144,
+    "synthetic_scenarios": 1
+  },
+  "form_reconstruction": {
+    "direct_matches": 144,
+    "direct_total": 144,
+    "route_json_matches": 144,
+    "route_total": 144,
+    "structurally_accepted": 138,
+    "structurally_rejected": 6,
+    "validation_outcome_matches": 144
+  },
+  "corpus_matlab_generation": {
+    "uncertain_element_matches": 153,
+    "uncertain_element_total": 153,
+    "fixed_element_matches": 152,
+    "fixed_element_total": 152,
+    "joint_continuous_matches": 9,
+    "joint_continuous_total": 9,
+    "joint_binary_matches": 0,
+    "joint_binary_total": 0,
+    "relation_comment_matches": 152,
+    "relation_comment_total": 152
+  },
+  "synthetic_multivariate": {
+    "form_reconstruction": true,
+    "structurally_valid": true,
+    "expected_source_fragments": 24,
+    "matching_source_fragments": 24,
+    "joint_continuous_generated": true,
+    "joint_binary_generated": true
+  },
+  "robustness": {
+    "mutations": 29,
+    "detected": 29,
+    "correct_tier": 29,
+    "correct_gating": 29,
+    "crash_free": 29,
+    "detection_failures": [],
+    "tier_failures": [],
+    "gating_failures": [],
+    "crashes": []
+  }
+}

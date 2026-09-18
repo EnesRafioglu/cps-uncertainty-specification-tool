@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_08_drug_concentration",
+  "name": "Drug Plasma Concentration",
+  "description": "Steady-state plasma concentration of a drug in a closed-loop drug delivery system. Checks whether concentration stays within the therapeutic window.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Pharmacokinetic Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Steady-State Plasma Concentration",
+          "symbol": "C_plasma",
+          "unit": "ng/mL",
+          "description": "Predicted drug plasma level at steady state. Uncertain due to patient-specific pharmacokinetic variability.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Population pharmacokinetic model parameters",
+            "distribution": "gaussian",
+            "mean": 12.5,
+            "std": 2.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 91
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Therapeutic Window Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Safe Plasma Concentration",
+          "symbol": "C_max",
+          "unit": "ng/mL",
+          "description": "Upper bound of therapeutic window from clinical pharmacology",
+          "fixed_value": 18.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "(Dose_rate * F_bioavail) / CL_patient <= C_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(Dose_rate) = (Dose_rate · F_bioavail) / CL_patient; F = F_bioavail/CL (population PK parameter)",
+      "upr_description": "Steady-state plasma concentration is an affine function of infusion dose rate via the one-compartment PK model: C_ss = (Dose_rate · F) / CL. This parametric mapping propagates the dose rate uncertainty through the population pharmacokinetic parameters into the plasma concentration domain, where it must remain below C_max = 18 ng/mL."
+    }
+  ]
+}

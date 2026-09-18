@@ -1,0 +1,73 @@
+{
+  "scenario_id": "auto_16_aero_drag_reynolds",
+  "name": "Aerodynamic Drag Coefficient from Reynolds Number (Parametric)",
+  "description": "Drag coefficient C_D has a parametric dependence on Reynolds number Re via the empirical relation C_D = C_D0 + k/Re. Reynolds number varies with speed uncertainty, making C_D uncertain through a parametric UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Aerodynamic CFD Model",
+      "type": "AerodynamicSimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Vehicle Speed",
+          "symbol": "v_car",
+          "unit": "m/s",
+          "description": "Vehicle speed at aerodynamic evaluation point.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "KaRaceIng GPS speed data across endurance event",
+            "distribution": "gaussian",
+            "mean": 28,
+            "std": 2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 62
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Aerodynamic Performance Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Drag Coefficient",
+          "symbol": "C_D_max",
+          "unit": "dimensionless",
+          "description": "Lap time simulation: maximum C_D for target endurance lap time",
+          "fixed_value": 0.38
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "C_D = C_D0 + k/(rho*v*L/mu) <= C_D_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(v) = F·v + f where F = -k*mu/(rho*L*v²), f = C_D0 + k*mu/(rho*L*v_nom); affine approximation at v_nom=28 m/s",
+      "upr_description": "Parametric UPR: C_D is affine function of vehicle speed through empirical Reynolds number relation C_D=C_D0+k/Re."
+    }
+  ]
+}

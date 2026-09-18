@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_01_room_temperature",
+  "name": "Room Temperature Control",
+  "description": "Indoor temperature maintained by the HVAC system. Checks whether comfort set-point is achieved.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Thermal Zone Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Room Air Temperature",
+          "symbol": "T_room",
+          "unit": "°C",
+          "description": "Steady-state temperature in the occupied zone. Uncertain due to occupancy and solar gains.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "EnergyPlus simulation sensitivity study",
+            "min": 19.5,
+            "max": 23.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Low",
+            "risk_scale": 35
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Comfort Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Comfort Temperature",
+          "symbol": "T_comfort_max",
+          "unit": "°C",
+          "description": "ISO 7730 Category B comfort upper bound",
+          "fixed_value": 24
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_room <= T_comfort_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(T_room) = T_room if T_room <= T_comfort_max, else ∅",
+      "upr_description": "The ISO 7730 comfort bound acts as guard; the zone temperature uncertainty set is intersected with the admissible comfort half-space."
+    }
+  ]
+}

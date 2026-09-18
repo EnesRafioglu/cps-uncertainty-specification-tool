@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_02_joint_torque",
+  "name": "Joint Torque Under Payload",
+  "description": "Torque at the robot wrist joint under maximum payload. Checks whether rated torque is not exceeded.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Robot Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Wrist Joint Torque",
+          "symbol": "tau_wrist",
+          "unit": "Nm",
+          "description": "Maximum torque during fast pick-and-place motion with rated payload. Uncertain due to trajectory variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Dynamic simulation with path planning variation",
+            "min": 42,
+            "max": 58
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 75
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Robot Specification Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Rated Wrist Joint Torque",
+          "symbol": "tau_rated",
+          "unit": "Nm",
+          "description": "Manufacturer rated continuous torque for wrist joint",
+          "fixed_value": 55
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "tau_wrist <= tau_rated",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(τ_wrist) = τ_wrist if τ_wrist <= τ_rated, else ∅",
+      "upr_description": "The rated torque guards the peak wrist torque uncertainty set; torques above the 55 Nm manufacturer limit are excluded."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "scenario_id": "grid_14_islanding_guard",
+  "name": "Islanding Detection Guarded Activation",
+  "description": "When the islanding detection flag b_island=1, protection relays must trip within 2 s to isolate the distributed generator. Guarded UPR: the trip command applies only when b_island=1.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Islanding Detection Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Islanding Detection Flag",
+          "symbol": "b_island",
+          "unit": "dimensionless",
+          "description": "Binary flag: 0=grid connected (normal), 1=islanding detected by ROCOF or voltage relay.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "IEEE 1547 anti-islanding protection: ROCOF or voltage/frequency relay detection",
+            "option_0": "grid connected — normal operation",
+            "option_1": "islanding detected — protection trip required"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Protection Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Islanding Disconnect Time",
+          "symbol": "t_disconnect",
+          "unit": "s",
+          "description": "IEEE 1547: distributed generator must disconnect within 2 s of islanding detection",
+          "fixed_value": 2.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_island=1 => t_trip <= t_disconnect",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(relay) = trip_command if b_island=1, else normal_operation; guard activates protection when islanding detected",
+      "upr_description": "Guarded UPR: protection trip applies only when islanding detection flag b_island=1 is active."
+    }
+  ]
+}

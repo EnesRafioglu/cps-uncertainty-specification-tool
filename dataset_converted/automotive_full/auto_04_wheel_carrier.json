@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_04_wheel_carrier",
+  "name": "Wheel Carrier Manufacturing",
+  "description": "Manufacturing tolerance of wheel carrier mounting hole. Checks whether hole is wide enough for the bolt.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "CAD Geometry Model",
+      "type": "CADGeometryModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Mounting Hole Diameter",
+          "symbol": "d_hole",
+          "unit": "mm",
+          "description": "Actual hole diameter after machining. Varies due to manufacturing tolerances.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Supplier manufacturing tolerance specification",
+            "min": 9.95,
+            "max": 10.05
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Resources",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Assembly Model",
+      "type": "AssemblyModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Bolt Diameter",
+          "symbol": "d_bolt",
+          "unit": "mm",
+          "description": "Nominal bolt diameter from mechanical design",
+          "fixed_value": 10
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "d_hole >= d_bolt",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(d_hole) = d_hole if d_hole >= d_bolt, else ∅",
+      "upr_description": "The assembly constraint d_hole ≥ d_bolt is the guard. The hole diameter uncertainty set is intersected with the half-space above the bolt diameter."
+    }
+  ]
+}

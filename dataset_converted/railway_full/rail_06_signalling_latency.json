@@ -1,0 +1,71 @@
+{
+  "scenario_id": "rail_06_signalling_latency",
+  "name": "ETCS Signalling Message Latency",
+  "description": "End-to-end latency of ETCS movement authority messages. Checks whether safety timing requirements are met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Radio Block Centre Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "MA Message End-to-End Latency",
+          "symbol": "t_ma",
+          "unit": "ms",
+          "description": "Latency from RBC computation to on-board acknowledgement. Uncertain due to GSM-R network load.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "GSM-R network measurement under peak load",
+            "min": 280,
+            "max": 680
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "ETCS Safety Timing Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable MA Latency",
+          "symbol": "t_ma_max",
+          "unit": "ms",
+          "description": "ETCS Subset-026 maximum permitted message latency",
+          "fixed_value": 500
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_ma <= t_ma_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_ma) = t_ma if t_ma <= t_ma_max, else ∅",
+      "upr_description": "The ETCS Subset-026 latency limit guards the message delivery uncertainty set; latencies above 500 ms trigger protective braking."
+    }
+  ]
+}

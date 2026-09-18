@@ -1,0 +1,73 @@
+{
+  "scenario_id": "robot_13_tcp_joint_bidir",
+  "name": "TCP Error and Joint Angle Bidirectional Coupling",
+  "description": "TCP positioning error and joint angle deviation are bidirectionally coupled through the robot forward kinematics: joint angle error implies TCP error and vice versa. Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Robot Kinematic Error Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Joint 1 Angle Deviation",
+          "symbol": "delta_q1",
+          "unit": "deg",
+          "description": "Angular deviation of joint 1 from commanded position.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ISO 9283 joint angle repeatability measurements on UR5",
+            "distribution": "gaussian",
+            "mean": 0,
+            "std": 0.05
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Joint Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Joint Angle Deviation",
+          "symbol": "delta_q_max",
+          "unit": "deg",
+          "description": "Robot manufacturer: maximum joint angle deviation for positioning accuracy class",
+          "fixed_value": 0.15
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "delta_q1 <= delta_q_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(δq1) = δq1, σ₂₁(err_TCP) = J·δq — bidirectional coupling through forward kinematics Jacobian",
+      "upr_description": "Identity-bidir UPR: joint angle deviation and TCP error are bidirectionally coupled through robot kinematics."
+    }
+  ]
+}

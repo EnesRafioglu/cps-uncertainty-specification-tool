@@ -1,0 +1,73 @@
+{
+  "scenario_id": "auto_02_radiator_mounting",
+  "name": "Radiator Mounting",
+  "description": "Discrete mounting concept selection. Checks whether chosen geometry fits within available packaging space.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "CAD Assembly Model",
+      "type": "CADAssemblyModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Selected Mounting Concept",
+          "symbol": "b_mount",
+          "unit": "",
+          "description": "Binary choice between two supplier mounting solutions.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Supplier catalogue",
+            "option_0": "Supplier mounting concept A",
+            "option_1": "Supplier mounting concept B"
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Model Uncertainty",
+            "model_uncertainty_type": "Model Structure Uncertainty",
+            "source_type": "Resources",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "2nd Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Packaging Model",
+      "type": "PackagingModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Available Mounting Space",
+          "symbol": "S_available",
+          "unit": "mm",
+          "description": "Defined by vehicle chassis CAD model",
+          "fixed_value": "CAD packaging volume"
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "subset_of",
+      "expression": "geometry(b_mount) ⊆ S_available",
+      "upr_type": "structural",
+      "upr_sigma": "σ_A(b_mount) = geometry_A, σ_B(b_mount) = geometry_B; both intersected with S_available",
+      "upr_description": "The binary mounting choice decomposes into two candidate geometry sets (option A, option B). Each is propagated as a separate structural sub-target and intersected with the available packaging space. Consistency holds if at least one option fits."
+    }
+  ]
+}

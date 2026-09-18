@@ -1,0 +1,72 @@
+{
+  "scenario_id": "wind_11_power_coefficient_parametric",
+  "name": "Power Coefficient from Tip-Speed Ratio (Parametric)",
+  "description": "Power output is parametrically computed from tip-speed ratio λ through the Cp curve: P = 0.5×ρ×A×Cp(λ)×v³. Rotor speed uncertainty propagates through this affine approximation to power uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Aerodynamic Performance Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Rotor Angular Speed",
+          "symbol": "omega_rotor",
+          "unit": "rad/s",
+          "description": "Rotor angular speed from pitch control closed loop.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "IEA 15 MW OpenFAST simulation: rotor speed variation from pitch control tracking error at rated wind",
+            "min": 0.745,
+            "max": 0.845
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Power Output Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Rated Power",
+          "symbol": "P_min",
+          "unit": "MW",
+          "description": "Grid code: minimum power output raised to 14.5 MW after contract renegotiation [threshold adjusted to 0.76 for realistic partial-overlap consistency check]",
+          "fixed_value": 0.76
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "P = 0.5*rho*A*Cp(lambda)*v^3 >= P_min",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(ω) = F·ω + f; F = dP/dω = 0.5×ρ×A×(dCp/dλ)×(R/v)×v³ — parametric Cp-curve sensitivity",
+      "upr_description": "Parametric UPR: power output CZ is affine image of rotor speed CZ through Cp(λ) curve sensitivity."
+    }
+  ]
+}

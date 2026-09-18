@@ -109,3 +109,18 @@ MATLAB dependencies:
 
 - [CORA](https://github.com/TUMcps/CORA) for continuous zonotopes
 - [aalanwar/Logical-Zonotope](https://github.com/aalanwar/Logical-Zonotope) for logical zonotopes
+
+## Evaluation tests
+
+The `dataset_converted/` directory contains the 144 scenario fixtures used in the
+evaluation. The test suite checks form reconstruction, rendered JSON, validation,
+MATLAB source generation, and controlled invalid-input mutations. It also includes a
+hand-crafted fixture with multiple continuous and binary elements.
+
+Run the suite from the repository root with the virtual environment activated:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Each run writes its aggregate counts to `tests/evaluation_results.json`.

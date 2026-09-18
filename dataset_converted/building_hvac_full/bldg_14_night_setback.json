@@ -1,0 +1,71 @@
+{
+  "scenario_id": "bldg_14_night_setback",
+  "name": "Night Setback Guard Activation",
+  "description": "HVAC night setback mode reduces heating setpoint by 4°C when occupancy flag b_occ=0. Guarded UPR: the setpoint reduction applies only when the guard condition is active.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "BMS Occupancy Schedule Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Occupancy Flag",
+          "symbol": "b_occ",
+          "unit": "dimensionless",
+          "description": "Binary occupancy state: 1=occupied (daytime), 0=unoccupied (night setback).",
+          "uncertainty": {
+            "type": "binary",
+            "source": "BMS occupancy schedule from building access log",
+            "option_0": "unoccupied — night setback active",
+            "option_1": "occupied — normal setpoint"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Low",
+            "risk_scale": 35
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "HVAC Setpoint Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Allowable Setpoint",
+          "symbol": "T_set_min",
+          "unit": "°C",
+          "description": "Building regulations: minimum temperature for unoccupied commercial buildings",
+          "fixed_value": 15
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "T_set = 21 - 4*(1-b_occ) >= T_set_min",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(T_set) = T_set − 4 if b_occ=0, else T_set; guard deactivates setback when occupied",
+      "upr_description": "Guarded UPR: the 4°C setback reduction applies only when unoccupied flag b_occ=0 is active."
+    }
+  ]
+}

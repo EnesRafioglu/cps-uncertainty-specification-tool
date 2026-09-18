@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_15_cooling_strategy",
+  "name": "Cooling Strategy Variant Selection (Disambiguation)",
+  "description": "Two cooling configurations are available for the KaRaceIng inverter: air-cooled (lower mass, higher temperature) and water-cooled (higher mass, lower temperature). Disambiguation UPR selects between two propagated uncertainty sets.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Inverter Thermal Configuration Model",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Inverter Temperature (Air-Cooled Variant)",
+          "symbol": "T_inv_air",
+          "unit": "°C",
+          "description": "Inverter junction temperature in air-cooled configuration.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "KaRaceIng thermal simulation: air-cooled inverter at peak power",
+            "min": 78,
+            "max": 92
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Inverter Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Inverter Temperature",
+          "symbol": "T_inv_max",
+          "unit": "°C",
+          "description": "IGBT junction temperature absolute maximum (inverter datasheet)",
+          "fixed_value": 95
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_inv = Select{T_air, T_water}[config] <= T_inv_max",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(config) = Select{CZ_air=[85±7], CZ_water=[60±8]} — both alternatives must satisfy constraint",
+      "upr_description": "Disambiguation UPR: cooling variant is selected from discrete set; both alternatives propagated and checked against limit."
+    }
+  ]
+}

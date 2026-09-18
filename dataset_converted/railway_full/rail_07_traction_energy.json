@@ -1,0 +1,73 @@
+{
+  "scenario_id": "rail_07_traction_energy",
+  "name": "Traction Energy Consumption",
+  "description": "Energy consumption of a train on a given route. Checks whether energy budget and grid substation capacity are respected.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Traction Energy Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Specific Energy Consumption",
+          "symbol": "E_spec",
+          "unit": "kWh/km",
+          "description": "Energy drawn from catenary per kilometre. Uncertain due to passenger load and driving style.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Fleet energy monitoring data over 6 months",
+            "distribution": "gaussian",
+            "mean": 28.5,
+            "std": 3.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Energy Contract Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Contracted Maximum Specific Energy",
+          "symbol": "E_max",
+          "unit": "kWh/km",
+          "description": "Maximum specific energy per traction power contract with grid operator",
+          "fixed_value": 35.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "E_spec <= E_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(E_spec) = E_spec; F = [1], f = [0]",
+      "upr_description": "Specific energy consumption is transferred directly (identity mapping) to the contract compliance check domain. No unit conversion or scaling is required — the measured kWh/km directly corresponds to the contracted limit, and the uncertainty set must remain within the 35 kWh/km threshold."
+    }
+  ]
+}

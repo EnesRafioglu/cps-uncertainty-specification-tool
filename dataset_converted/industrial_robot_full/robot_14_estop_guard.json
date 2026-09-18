@@ -1,0 +1,71 @@
+{
+  "scenario_id": "robot_14_estop_guard",
+  "name": "Emergency Stop Activation Guard",
+  "description": "When the safety scanner detects an intruder (b_intruder=1), the emergency stop must activate and bring the robot to rest within 0.5 s. Guarded UPR: the stop torque ramp applies only when b_intruder=1.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Safety Scanner Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Intruder Detection Flag",
+          "symbol": "b_intruder",
+          "unit": "dimensionless",
+          "description": "Binary safety flag: 0=safe zone clear, 1=intruder detected by safety laser scanner.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Safety laser scanner (Sick S300) detection logic",
+            "option_0": "zone clear — normal operation",
+            "option_1": "intruder detected — emergency stop required"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Safety Stop Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Stop Time",
+          "symbol": "t_stop",
+          "unit": "s",
+          "description": "IEC 60204-1 stop category 0: maximum time to reach zero velocity",
+          "fixed_value": 0.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_intruder=1 => t_to_stop <= t_stop",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(τ) = 0 if b_intruder=1, else τ; guard activates zero-torque command when intruder flag set",
+      "upr_description": "Guarded UPR: emergency stop logic applies only when intruder flag b_intruder=1 is active."
+    }
+  ]
+}

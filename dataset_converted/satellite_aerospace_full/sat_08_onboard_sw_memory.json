@@ -1,0 +1,71 @@
+{
+  "scenario_id": "sat_08_onboard_sw_memory",
+  "name": "On-Board Software Memory Usage",
+  "description": "RAM usage of the on-board software. Checks whether sufficient memory headroom remains for in-orbit updates.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Software Resource Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "On-Board SW RAM Usage",
+          "symbol": "RAM_used",
+          "unit": "MB",
+          "description": "RAM consumed by the flight software stack. Uncertain due to compiler optimisation variability and dynamic allocation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Cross-compilation and heap analysis across build variants",
+            "min": 42,
+            "max": 58
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Memory Budget Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Available RAM Budget",
+          "symbol": "RAM_budget",
+          "unit": "MB",
+          "description": "Maximum RAM allocated to flight software in memory map",
+          "fixed_value": 55
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "RAM_stack + RAM_heap + RAM_os <= RAM_budget",
+      "upr_type": "structural",
+      "upr_sigma": "σ_stack(RAM) = stack_usage, σ_heap(RAM) = heap_usage, σ_os(RAM) = os_overhead; sum must satisfy RAM_stack+RAM_heap+RAM_os <= RAM_budget",
+      "upr_description": "Total flight software RAM usage decomposes into three structurally independent contributions: stack usage, dynamic heap allocation, and OS/middleware overhead. The structural mapping propagates each component's uncertainty set separately, and the consistency condition requires that the sum of all three components stays within the 55 MB memory budget."
+    }
+  ]
+}

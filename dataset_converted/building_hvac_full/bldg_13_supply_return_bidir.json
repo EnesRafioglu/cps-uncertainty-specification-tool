@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_13_supply_return_bidir",
+  "name": "Supply/Return Air Temperature Bidirectional Coupling",
+  "description": "Supply air temperature and return air temperature are bidirectionally coupled through the zone heat balance: a change in supply temperature directly affects return temperature. Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "AHU Air Temperature Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Supply Air Temperature",
+          "symbol": "T_supply",
+          "unit": "°C",
+          "description": "Air handling unit supply temperature under chiller setpoint uncertainty.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "PLEIAData (doi:10.1038/s41597-023-02023-3): AHU supply temperature during cooling mode",
+            "min": 14,
+            "max": 18
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "HVAC Temperature Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Supply Temperature for Cooling",
+          "symbol": "T_supply_max",
+          "unit": "°C",
+          "description": "Maximum supply temperature for effective cooling: tight 17°C limit under high occupancy (ASHRAE 62.1)",
+          "fixed_value": 17
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_supply <= T_supply_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(T_supply) = T_supply, σ₂₁(T_return) = T_supply + ΔT_zone — bidirectional coupling through zone heat balance",
+      "upr_description": "Identity-bidir UPR: supply and return temperatures are bidirectionally linked through zone heat balance."
+    }
+  ]
+}

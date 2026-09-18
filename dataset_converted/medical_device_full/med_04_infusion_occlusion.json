@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_04_infusion_occlusion",
+  "name": "Infusion Line Occlusion Detection",
+  "description": "Pressure buildup in a blocked infusion line. Checks whether the pump detects occlusion before dangerous pressure is reached.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Fluidic Occlusion Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Line Pressure at Occlusion",
+          "symbol": "P_line",
+          "unit": "mmHg",
+          "description": "Pressure in infusion tubing during occlusion event. Uncertain due to tubing compliance and fluid properties.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Bench test occlusion experiments",
+            "min": 280,
+            "max": 420
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Alarm Configuration Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Occlusion Alarm Trigger Pressure",
+          "symbol": "P_alarm",
+          "unit": "mmHg",
+          "description": "IEC 60601-2-24 occlusion alarm requirement",
+          "fixed_value": 300
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_alarm <= P_line",
+      "upr_type": "identity",
+      "upr_sigma": "σ(P_line) = P_line; F = [1], f = [0]",
+      "upr_description": "The line pressure during occlusion is propagated directly (identity mapping) to the alarm threshold domain. No transformation is applied — the pressure value at the pump outlet equals the value seen by the alarm logic, and the uncertainty set must intersect the region above P_alarm = 300 mmHg."
+    }
+  ]
+}

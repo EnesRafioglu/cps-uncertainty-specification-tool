@@ -1,0 +1,122 @@
+{
+  "scenario_id": "bldg_09_temp_co2_coupled",
+  "name": "Room Temperature and CO2 — Ventilation Coupling",
+  "description": "Room temperature and CO2 are both controlled by the HVAC ventilation rate, creating a negative correlation: more ventilation cools the room and reduces CO2 simultaneously.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Building Zone Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Zone Air Temperature",
+          "symbol": "T_room",
+          "unit": "°C",
+          "description": "Steady-state zone temperature. Negatively correlated with CO2 through ventilation.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PLEIAData (doi:10.1038/s41597-023-02023-3)",
+            "distribution": "gaussian",
+            "mean": 21.5,
+            "std": 1.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        },
+        {
+          "id": "e2",
+          "name": "CO2 Concentration",
+          "symbol": "C_CO2",
+          "unit": "ppm",
+          "description": "CO2 in occupied zone. Negatively correlated with T_room via ventilation rate.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PLEIAData (doi:10.1038/s41597-023-02023-3)",
+            "distribution": "gaussian",
+            "mean": 850.0,
+            "std": 100.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Building Comfort and Air Quality Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Maximum Comfort Temperature",
+          "symbol": "T_max",
+          "unit": "°C",
+          "description": "ISO 7730 Category B upper comfort limit",
+          "fixed_value": 24.0
+        },
+        {
+          "id": "e4",
+          "name": "Maximum CO2 Concentration",
+          "symbol": "C_max",
+          "unit": "ppm",
+          "description": "ASHRAE 62.1 indoor air quality limit",
+          "fixed_value": 1000.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": "<=",
+      "expression": "T_room <= T_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(T_room) = T_room if T_room <= T_max, else ∅",
+      "upr_description": "Comfort constraint on temperature dimension of 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": "<=",
+      "expression": "C_CO2 <= C_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(C_CO2) = C_CO2 if C_CO2 <= C_max, else ∅",
+      "upr_description": "Air quality constraint on CO2 dimension of 2D CZ."
+    }
+  ]
+}

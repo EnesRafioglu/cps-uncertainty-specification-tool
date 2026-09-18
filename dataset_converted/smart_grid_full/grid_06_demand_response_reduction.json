@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_06_demand_response_reduction",
+  "name": "Demand Response Load Reduction",
+  "description": "Actual load reduction achieved by a demand response programme. Checks whether committed curtailment is delivered.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Demand Response Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Achieved Load Reduction",
+          "symbol": "delta_P_dr",
+          "unit": "MW",
+          "description": "Actual load reduction during a DR event. Uncertain due to customer participation rate and baseline estimation.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Historical DR event performance data",
+            "distribution": "gaussian",
+            "mean": 42,
+            "std": 8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 62
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Grid Operator Contract Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Committed Load Reduction",
+          "symbol": "delta_P_committed",
+          "unit": "MW",
+          "description": "Contracted load reduction capacity sold to TSO",
+          "fixed_value": 35
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "N_participants * P_avg_load * r_participation >= delta_P_committed",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(N_participants, P_per_participant) = N_participants · P_per_participant · participation_rate; affine in N",
+      "upr_description": "The achieved load reduction is an affine function of the number of active participants and their average load: ΔP_dr = N · P_avg · r_participation. This parametric mapping propagates the joint uncertainty in participation count and individual load through the aggregation formula into the total reduction domain, where it must meet the contracted commitment of 35 MW."
+    }
+  ]
+}

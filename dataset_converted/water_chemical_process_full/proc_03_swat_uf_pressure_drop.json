@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_03_swat_uf_pressure_drop",
+  "name": "SWaT UF Membrane Differential Pressure (DPIT301)",
+  "description": "Differential pressure across the ultrafiltration membrane in Stage 3. High pressure drop indicates membrane fouling requiring backwash. Checks whether pressure stays below backwash trigger threshold.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Stage 3 UF Membrane Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "UF Membrane Differential Pressure",
+          "symbol": "DPIT301",
+          "unit": "kPa",
+          "description": "Differential pressure across UF membrane. Increases during filtration, resets after backwash cycle. Normal operating range from SWaT testbed specification.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT testbed specification: backwash triggered at DPIT301 > 40 kPa (from SWaT security paper, Goh et al. 2016). Normal pre-backwash range is 5–35 kPa based on published invariant analyses.",
+            "min": 5,
+            "max": 35
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Backwash Control Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Backwash Trigger Pressure",
+          "symbol": "DPIT301_max",
+          "unit": "kPa",
+          "description": "PLC3 triggers backwash cycle when DPIT301 exceeds 40 kPa. From SWaT system specification (Goh et al. 2016).",
+          "fixed_value": 40
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "DPIT301 <= DPIT301_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(DPIT301) = DPIT301 if DPIT301 <= DPIT301_max, else ∅",
+      "upr_description": "The backwash trigger threshold of 40 kPa guards the membrane pressure uncertainty set; pressures above this trigger the backwash cycle."
+    }
+  ]
+}

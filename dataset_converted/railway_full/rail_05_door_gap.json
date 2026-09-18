@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_05_door_gap",
+  "name": "Platform Gap at Train Doors",
+  "description": "Horizontal gap between train door and platform edge. Checks whether accessibility and safety requirements are met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Vehicle-Track Geometry Model",
+      "type": "CADGeometryModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Horizontal Door-Platform Gap",
+          "symbol": "g_door",
+          "unit": "mm",
+          "description": "Residual gap at boarding position. Uncertain due to vehicle suspension settlement and track geometry tolerance.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Geometric survey at 50 platform stops",
+            "min": 45,
+            "max": 125
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Resources",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Accessibility Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Permitted Gap",
+          "symbol": "g_max",
+          "unit": "mm",
+          "description": "TSI PRM maximum horizontal gap for level boarding",
+          "fixed_value": 100
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "g_door <= g_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(g_door) = g_door if g_door <= g_max, else ∅",
+      "upr_description": "The TSI PRM gap limit guards the platform gap uncertainty set; gaps above 100 mm fail the accessibility standard."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_01_insulin_dose",
+  "name": "Insulin Dose Accuracy",
+  "description": "Accuracy of insulin delivery by a closed-loop pump. Checks whether delivered dose stays within therapeutic bounds.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Infusion Pump Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Delivered Insulin Dose",
+          "symbol": "D_insulin",
+          "unit": "IU",
+          "description": "Actual bolus dose delivered by the pump actuator. Uncertain due to motor wear and fluid viscosity variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Pump calibration data over 1000 actuations",
+            "min": 4.6,
+            "max": 5.4
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Clinical Safety Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Therapeutic Dose Range Upper Bound",
+          "symbol": "D_max",
+          "unit": "IU",
+          "description": "FDA-approved maximum single bolus for target patient profile",
+          "fixed_value": 5.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "D_insulin <= D_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(D_insulin) = D_insulin if D_insulin <= D_max, else ∅",
+      "upr_description": "The FDA maximum bolus guards the delivered dose uncertainty set; any dose above 5.5 IU is excluded as potentially dangerous."
+    }
+  ]
+}

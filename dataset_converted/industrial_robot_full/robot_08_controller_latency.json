@@ -1,0 +1,71 @@
+{
+  "scenario_id": "robot_08_controller_latency",
+  "name": "Robot Controller Communication Latency",
+  "description": "Fieldbus latency between robot controller and external PLC. Checks whether synchronised motion control is achievable.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Fieldbus Communication Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "EtherCAT Cycle Jitter",
+          "symbol": "jitter_bus",
+          "unit": "µs",
+          "description": "Timing jitter of the EtherCAT fieldbus cycle. Uncertain due to CPU load and interrupt latency.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Real-time OS latency measurements under load",
+            "min": 2,
+            "max": 18
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 62
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Motion Synchronisation Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Jitter",
+          "symbol": "jitter_max",
+          "unit": "µs",
+          "description": "Maximum jitter for synchronised multi-axis motion per EtherCAT specification",
+          "fixed_value": 10
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "jitter_bus <= jitter_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(jitter_bus) = jitter_bus if jitter_bus <= jitter_max, else ∅",
+      "upr_description": "The EtherCAT jitter limit guards the fieldbus latency uncertainty set; jitter values above 10 µs are excluded as incompatible with synchronised multi-axis motion."
+    }
+  ]
+}

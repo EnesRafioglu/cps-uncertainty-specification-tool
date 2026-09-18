@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_04_swat_water_quality_chlorine",
+  "name": "SWaT Water Chlorine Concentration (AIT202)",
+  "description": "Chlorine concentration in Stage 2 after chemical dosing. Too little chlorine → biological growth; too much → toxic. Checks whether concentration stays within disinfection band.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Stage 2 Water Quality Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Chlorine Concentration",
+          "symbol": "AIT202",
+          "unit": "mg/L",
+          "description": "Residual chlorine after NaOCl dosing. Controlled by dosing pump P203. Uncertainty from dosing pump variability and sensor response time.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "SWaT AIT202 normal operation: WHO guideline 0.2–0.5 mg/L free chlorine for disinfection; SWaT operates slightly above this (target ~0.5 mg/L). Std estimated from published SWaT anomaly detection analyses showing tight clustering around setpoint.",
+            "distribution": "gaussian",
+            "mean": 0.52,
+            "std": 0.12
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Water Quality Regulatory Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Disinfection Chlorine Level",
+          "symbol": "AIT202_min",
+          "unit": "mg/L",
+          "description": "WHO Guidelines for Drinking-Water Quality: minimum 0.2 mg/L free chlorine residual",
+          "fixed_value": 0.2
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "AIT202 >= AIT202_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(AIT202) = AIT202 if AIT202 >= AIT202_min, else ∅",
+      "upr_description": "The WHO minimum chlorine residual guards the concentration uncertainty set; values below 0.2 mg/L indicate inadequate disinfection."
+    }
+  ]
+}

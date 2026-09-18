@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_01_attitude_error",
+  "name": "Attitude Control Error",
+  "description": "Pointing error of the satellite attitude control system. Checks whether the error is small enough for the payload instrument.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Attitude Determination Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "3-Sigma Pointing Error",
+          "symbol": "epsilon_att",
+          "unit": "arcsec",
+          "description": "3-sigma attitude determination and control error. Uncertain due to sensor noise and thermal distortions.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Monte Carlo simulation of ADCS noise model",
+            "distribution": "gaussian",
+            "mean": 2.8,
+            "std": 0.6
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Payload Instrument Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Pointing Error",
+          "symbol": "epsilon_max",
+          "unit": "arcsec",
+          "description": "Optical payload image quality requirement",
+          "fixed_value": 5.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "epsilon_att <= epsilon_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(ε_att) = ε_att if ε_att <= ε_max, else ∅",
+      "upr_description": "The payload pointing requirement guards the attitude error uncertainty set; errors above 5 arcsec degrade image resolution below mission requirements."
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "scenario_id": "proc_09_level_flow_coupled",
+  "name": "SWaT Tank Level and Inlet Flow — Pump Switching Coupling",
+  "description": "SWaT LIT101 and FIT101 are negatively correlated through pump switching logic: low level triggers pump activation and high flow, while high level coincides with low or zero flow.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Stage 1 Physical Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Tank T101 Water Level",
+          "symbol": "LIT101",
+          "unit": "mm",
+          "description": "Water level. Negatively correlated with FIT101 through pump switching.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "SWaT dataset normal operation (iTrust SUTD): 7-day run at 1 Hz",
+            "distribution": "gaussian",
+            "mean": 525.0,
+            "std": 148.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Inlet Flow Rate",
+          "symbol": "FIT101",
+          "unit": "m3/h",
+          "description": "Inlet flow rate. Negatively correlated with LIT101 through pump switching.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT dataset: FIT101 during normal open-valve operation",
+            "min": 0.8,
+            "max": 1.55
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "SWaT Safety Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Maximum Tank Level",
+          "symbol": "LIT101_max",
+          "unit": "mm",
+          "description": "SWaT overflow threshold (Goh et al. 2016)",
+          "fixed_value": 1000.0
+        },
+        {
+          "id": "e4",
+          "name": "Minimum Inlet Flow",
+          "symbol": "FIT101_min",
+          "unit": "m3/h",
+          "description": "Minimum flow to maintain downstream RO production",
+          "fixed_value": 0.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": "<=",
+      "expression": "LIT101 <= LIT101_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(LIT101) = LIT101 if LIT101 <= LIT101_max, else ∅",
+      "upr_description": "Overflow constraint on tank level dimension of 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": ">=",
+      "expression": "FIT101 >= FIT101_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(FIT101) = FIT101 if FIT101 >= FIT101_min, else ∅",
+      "upr_description": "Production constraint on flow dimension of 2D CZ."
+    }
+  ]
+}

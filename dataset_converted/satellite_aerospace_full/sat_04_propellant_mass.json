@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_04_propellant_mass",
+  "name": "Propellant Mass Budget",
+  "description": "Remaining propellant mass after orbit insertion. Checks whether station-keeping lifetime can be met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Orbit Manoeuvre Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Propellant Mass After Injection",
+          "symbol": "m_prop",
+          "unit": "kg",
+          "description": "Propellant remaining after launch vehicle dispersion and orbit correction. Uncertain due to launch dispersion.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Statistical analysis of launch vehicle dispersion data",
+            "min": 38.2,
+            "max": 43.5
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Mission Lifetime Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Propellant for Station-Keeping",
+          "symbol": "m_prop_min",
+          "unit": "kg",
+          "description": "Propellant required for 15 years station-keeping at GEO",
+          "fixed_value": 40.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "m_prop >= m_prop_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(m_prop) = m_prop if m_prop >= m_prop_min, else ∅",
+      "upr_description": "The station-keeping propellant requirement guards the post-injection mass uncertainty set; masses below 40 kg result in insufficient lifetime."
+    }
+  ]
+}

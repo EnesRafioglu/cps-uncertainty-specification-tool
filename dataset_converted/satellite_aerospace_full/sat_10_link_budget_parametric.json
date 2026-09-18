@@ -1,0 +1,73 @@
+{
+  "scenario_id": "sat_10_link_budget_parametric",
+  "name": "Link Budget Margin from Distance (Parametric)",
+  "description": "Received signal power is parametrically computed from free-space path loss: P_rx = P_tx - FSPL(d) where FSPL = 20log(d) + constants. Distance uncertainty propagates through this log-linear formula to receive power uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Link Budget Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Orbital Altitude",
+          "symbol": "h_orbit",
+          "unit": "km",
+          "description": "Current orbital altitude affecting free-space path loss.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "AcubeSAT ADCS simulation: orbital altitude uncertainty from launch dispersion and drag",
+            "distribution": "gaussian",
+            "mean": 550,
+            "std": 25
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 72
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Link Performance Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Received Signal Power",
+          "symbol": "P_rx_min",
+          "unit": "dBm",
+          "description": "Ground station receiver sensitivity threshold",
+          "fixed_value": -108
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "P_rx = P_tx + G_tx + G_rx - FSPL(h) >= P_rx_min",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(h) = F·h + f; F = -20/(ln(10)×h_nom) dB/km (linearised log derivative), f = P_tx+G_tx+G_rx-FSPL(h_nom)",
+      "upr_description": "Parametric UPR: receive power CZ is affine image of orbital altitude CZ through linearised free-space path loss."
+    }
+  ]
+}

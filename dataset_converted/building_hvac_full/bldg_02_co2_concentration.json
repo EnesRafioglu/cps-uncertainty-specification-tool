@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_02_co2_concentration",
+  "name": "CO2 Concentration in Occupied Zone",
+  "description": "CO2 level in a meeting room with variable occupancy. Checks whether ventilation rate is sufficient.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "IAQ Ventilation Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak CO2 Concentration",
+          "symbol": "C_CO2",
+          "unit": "ppm",
+          "description": "Peak CO2 during peak occupancy. Uncertain due to variable number of occupants and metabolic rate.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Demand-controlled ventilation field study",
+            "min": 780,
+            "max": 1150
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Indoor Air Quality Standard",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "CO2 Acceptability Threshold",
+          "symbol": "C_CO2_max",
+          "unit": "ppm",
+          "description": "ASHRAE 62.1 recommended indoor CO2 limit",
+          "fixed_value": 1000
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "C_CO2 <= C_CO2_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(C_CO2) = C_CO2 if C_CO2 <= C_CO2_max, else ∅",
+      "upr_description": "The ASHRAE 62.1 limit guards the CO₂ uncertainty set; only concentrations at or below 1000 ppm remain consistent."
+    }
+  ]
+}

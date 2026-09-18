@@ -1,0 +1,72 @@
+{
+  "scenario_id": "wind_05_pitch_actuator",
+  "name": "Pitch Actuator Response Time",
+  "description": "Hydraulic pitch actuator response time under fault conditions. Checks whether blade feathering happens fast enough to prevent overspeed.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Pitch Control Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Pitch Actuator Response Time",
+          "symbol": "t_pitch",
+          "unit": "s",
+          "description": "Time to feather blade from rated to 90 degrees. Uncertain due to hydraulic pressure variation and temperature.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Hydraulic system characterisation tests",
+            "min": 3.2,
+            "max": 5.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Safety System Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Pitch Response Time",
+          "symbol": "t_pitch_max",
+          "unit": "s",
+          "description": "IEC 61400-1 safety system response time requirement",
+          "fixed_value": 5.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_pitch <= t_pitch_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_pitch) = t_pitch if t_pitch <= t_pitch_max, else ∅",
+      "upr_description": "The IEC 61400-1 safety response time guards the pitch actuator uncertainty set; response times above 5.0 s risk rotor overspeed."
+    }
+  ]
+}

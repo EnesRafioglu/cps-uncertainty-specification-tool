@@ -1,0 +1,73 @@
+{
+  "scenario_id": "grid_12_wind_forecast_structural",
+  "name": "Total Grid Load Uncertainty Structural Composition",
+  "description": "Total net grid load uncertainty is structurally composed from demand forecast error and wind power forecast error — two independent uncertainty sources. Structural UPR: total CZ is Minkowski sum of two component CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Net Load Forecast Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Demand Forecast Error",
+          "symbol": "delta_demand",
+          "unit": "MW",
+          "description": "Deviation of actual demand from day-ahead forecast.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "SMARD: day-ahead demand forecast error for regional control area (smaller than national)",
+            "distribution": "gaussian",
+            "mean": 0,
+            "std": 60
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Balancing Reserve Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Available Balancing Reserve",
+          "symbol": "P_reserve",
+          "unit": "MW",
+          "description": "Available primary balancing reserve (MW) — tight FCR band for realistic partial overlap",
+          "fixed_value": 50
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "delta_net = |delta_demand + delta_wind| <= P_reserve",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(δᵢ) = δᵢ for i=demand,wind; CZ_net = CZ_demand ⊕ CZ_wind (Minkowski sum of two independent error CZs)",
+      "upr_description": "Structural UPR: total net load uncertainty CZ is Minkowski sum of demand and wind forecast error CZs."
+    }
+  ]
+}

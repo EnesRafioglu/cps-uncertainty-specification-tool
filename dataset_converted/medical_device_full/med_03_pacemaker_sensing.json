@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_03_pacemaker_sensing",
+  "name": "Pacemaker Sensing Threshold",
+  "description": "Sensitivity of a cardiac pacemaker to intrinsic heart signals. Checks whether the device correctly detects native beats to avoid unnecessary pacing.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Cardiac Signal Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Intrinsic R-wave Amplitude",
+          "symbol": "V_R",
+          "unit": "mV",
+          "description": "Amplitude of native ventricular depolarisation signal. Varies with electrode placement and tissue impedance.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Implant follow-up data from 150 patients",
+            "distribution": "gaussian",
+            "mean": 8.5,
+            "std": 2.1
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Sensing Configuration Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Programmed Sensing Threshold",
+          "symbol": "V_sens",
+          "unit": "mV",
+          "description": "Programmed sensing threshold ensuring reliable native beat detection",
+          "fixed_value": 5.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "V_R >= V_sens",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(V_R) = V_R if V_R >= V_sens, else ∅",
+      "upr_description": "The programmed sensing threshold guards the R-wave amplitude uncertainty set; amplitudes below 5.0 mV fall outside the consistent detection region."
+    }
+  ]
+}

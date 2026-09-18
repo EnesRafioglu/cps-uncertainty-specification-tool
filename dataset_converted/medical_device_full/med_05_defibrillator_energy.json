@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_05_defibrillator_energy",
+  "name": "Defibrillator Shock Energy",
+  "description": "Energy delivered by an AED shock. Checks whether energy is within the therapeutic window.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Capacitor Discharge Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Delivered Shock Energy",
+          "symbol": "E_shock",
+          "unit": "J",
+          "description": "Transthoracic energy delivered to the patient. Varies with patient impedance and electrode contact.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Impedance-compensated discharge characterisation",
+            "min": 145,
+            "max": 175
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 93
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Clinical Protocol Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Safe Shock Energy",
+          "symbol": "E_max",
+          "unit": "J",
+          "description": "AHA guideline maximum for biphasic defibrillation",
+          "fixed_value": 200
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "E_shock <= E_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(E_shock) = E_shock if E_shock <= E_max, else ∅",
+      "upr_description": "The AHA maximum of 200 J guards the delivered energy uncertainty set; energies above this threshold risk myocardial damage."
+    }
+  ]
+}

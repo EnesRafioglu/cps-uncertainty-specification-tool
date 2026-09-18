@@ -1,0 +1,73 @@
+{
+  "scenario_id": "wind_15_control_strategy_variant",
+  "name": "Control Strategy Variant Selection (Disambiguation)",
+  "description": "Two control strategies: standard (derating disabled, max power) and curtailed (derating active, reduced noise). Disambiguation UPR selects the power output CZ based on the operational mode decision.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Turbine Operating Mode Model",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Standard Mode Power Output",
+          "symbol": "P_standard",
+          "unit": "MW",
+          "description": "Power output in standard (uncurtailed) operation.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "IEC 61400-12-1 power curve measurement uncertainty in standard operating mode",
+            "distribution": "gaussian",
+            "mean": 15.0,
+            "std": 0.35
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Grid Connection Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Grid Connection Power",
+          "symbol": "P_min",
+          "unit": "MW",
+          "description": "Grid connection agreement: minimum power output during curtailed operation",
+          "fixed_value": 10
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "P_out = Select{P_standard, P_curtailed}[mode] >= P_min",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(mode) = Select{CZ_std=[15±0.69], CZ_curt=[11.5±1.5]} — both checked against P_min=10 MW",
+      "upr_description": "Disambiguation UPR: operating mode selects the power output CZ; both standard and curtailed modes must satisfy grid minimum."
+    }
+  ]
+}

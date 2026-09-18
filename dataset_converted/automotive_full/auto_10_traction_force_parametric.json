@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_10_traction_force_parametric",
+  "name": "Traction Force from Motor Torque (Parametric)",
+  "description": "KaRaceIng motor torque is uncertain due to thermal derating. Traction force at the wheel is an affine function of motor torque via gear ratio and wheel radius. Parametric UPR maps the torque CZ to the traction force CZ.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Motor Output Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Motor Output Torque",
+          "symbol": "tau_motor",
+          "unit": "Nm",
+          "description": "Peak motor torque subject to thermal derating.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "KaRaceIng dyno tests across operating temperature range",
+            "min": 175,
+            "max": 225
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Traction Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Traction Force",
+          "symbol": "F_min",
+          "unit": "N",
+          "description": "Lap simulation: minimum traction force for chicane exit acceleration (3400 N)",
+          "fixed_value": 3400
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "F_traction = tau_motor * G / r >= F_min",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(τ) = F·τ + f where F = G/r = 3.8/0.23 ≈ 16.52, f = 0; CZ_F = [c_F±g_F] = [tau_c*16.52 ± tau_g*16.52]",
+      "upr_description": "Parametric UPR: traction force CZ is affine image of motor torque CZ through F = τ·G/r."
+    }
+  ]
+}

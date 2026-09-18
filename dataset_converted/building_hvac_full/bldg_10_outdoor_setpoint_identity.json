@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_10_outdoor_setpoint_identity",
+  "name": "Outdoor Temperature to Zone Setpoint Identity",
+  "description": "Outdoor temperature uncertainty propagates directly (identity UPR) into the HVAC zone setpoint calculation: setpoint = T_outdoor + offset. Uncertainty carries unchanged.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Outdoor Thermal Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Outdoor Air Temperature",
+          "symbol": "T_outdoor",
+          "unit": "°C",
+          "description": "Outdoor dry-bulb temperature from weather station.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "PLEIAData (doi:10.1038/s41597-023-02023-3): outdoor temperature during winter occupied hours",
+            "min": 2,
+            "max": 8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Low",
+            "risk_scale": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "HVAC Setpoint Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Heating Setpoint",
+          "symbol": "T_set_max",
+          "unit": "°C",
+          "description": "Programmable thermostat upper heating setpoint limit [threshold adjusted to 7.1 for realistic partial-overlap consistency check]",
+          "fixed_value": 7.1
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_set = T_outdoor + 18.5 <= T_set_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(T_outdoor) = T_outdoor; F=[1], f=18.5 — uncertainty propagates unchanged through fixed offset",
+      "upr_description": "Identity UPR: outdoor temperature uncertainty propagates unchanged (plus fixed offset) into zone setpoint model."
+    }
+  ]
+}

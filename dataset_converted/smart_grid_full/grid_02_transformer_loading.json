@@ -1,0 +1,73 @@
+{
+  "scenario_id": "grid_02_transformer_loading",
+  "name": "Distribution Transformer Loading",
+  "description": "Loading of a distribution transformer due to EV charging demand. Checks whether rated capacity is not exceeded.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Load Flow Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Transformer Loading",
+          "symbol": "S_trafo",
+          "unit": "kVA",
+          "description": "Peak apparent power due to uncontrolled EV charging. Uncertain due to charging arrival patterns.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Statistical EV charging behaviour study",
+            "distribution": "gaussian",
+            "mean": 380,
+            "std": 45
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Transformer Rating Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Transformer Rated Capacity",
+          "symbol": "S_rated",
+          "unit": "kVA",
+          "description": "Nameplate rating of installed distribution transformer",
+          "fixed_value": 400
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "S_trafo <= S_rated",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(S_trafo) = S_trafo if S_trafo <= S_rated, else ∅",
+      "upr_description": "The nameplate rating guards the transformer loading uncertainty set; loading above 400 kVA causes thermal overload."
+    }
+  ]
+}

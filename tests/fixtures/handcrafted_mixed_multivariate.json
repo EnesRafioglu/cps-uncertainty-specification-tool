@@ -1,0 +1,118 @@
+{
+  "scenario_id": "synthetic_mixed_multivariate",
+  "name": "Synthetic Mixed Multivariate Scenario",
+  "description": "Hand-crafted fixture for joint continuous and logical zonotope generation.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Synthetic Mixed Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Interval Parameter",
+          "symbol": "x_interval",
+          "unit": "m",
+          "description": "Synthetic interval dimension.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Synthetic test fixture",
+            "min": -2,
+            "max": 6
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "effect_type": "continuous non-deterministic"
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Gaussian Parameter",
+          "symbol": "y_gaussian",
+          "unit": "s",
+          "description": "Synthetic Gaussian dimension.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Synthetic test fixture",
+            "distribution": "gaussian",
+            "mean": 10,
+            "std": 2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "effect_type": "continuous probabilistic"
+          }
+        },
+        {
+          "id": "e3",
+          "name": "First Binary Choice",
+          "symbol": "choice_a",
+          "unit": "1",
+          "description": "First synthetic binary dimension.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Synthetic test fixture",
+            "option_0": "disabled",
+            "option_1": "enabled"
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "effect_type": "discrete non-deterministic"
+          }
+        },
+        {
+          "id": "e4",
+          "name": "Second Binary Choice",
+          "symbol": "choice_b",
+          "unit": "1",
+          "description": "Second synthetic binary dimension.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Synthetic test fixture",
+            "option_0": "mode_a",
+            "option_1": "mode_b"
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "effect_type": "discrete non-deterministic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Synthetic Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e5",
+          "name": "Reference Limit",
+          "symbol": "x_limit",
+          "unit": "m",
+          "description": "Synthetic fixed reference.",
+          "fixed_value": 8
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_5",
+      "from_element_id": "e1",
+      "to_element_id": "e5",
+      "operator": "<=",
+      "expression": "x_interval <= x_limit",
+      "upr_type": "constraint_based",
+      "upr_sigma": "sigma(x_interval) = x_interval if x_interval <= x_limit, else empty",
+      "upr_description": "Synthetic relation used only to complete the test fixture."
+    }
+  ]
+}

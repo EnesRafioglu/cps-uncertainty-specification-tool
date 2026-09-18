@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_06_radiation_dose",
+  "name": "Radiation Therapy Dose Delivery",
+  "description": "Dose delivered by a radiotherapy system to the tumour volume. Checks whether the therapeutic dose window is met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Treatment Planning Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Delivered Tumour Dose",
+          "symbol": "D_tumour",
+          "unit": "Gy",
+          "description": "Absorbed dose to the gross tumour volume. Uncertain due to patient positioning and tissue density variations.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Treatment delivery audit data",
+            "distribution": "gaussian",
+            "mean": 59.8,
+            "std": 1.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Clinical Prescription Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Prescribed Minimum Dose",
+          "symbol": "D_min",
+          "unit": "Gy",
+          "description": "ICRU 83 D95 prescription dose for tumour control",
+          "fixed_value": 58.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "D_tumour >= D_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(D_tumour) = D_tumour if D_tumour >= D_min, else ∅",
+      "upr_description": "The ICRU 83 D95 prescription minimum guards the delivered dose uncertainty set; doses below 58 Gy indicate underdosing."
+    }
+  ]
+}

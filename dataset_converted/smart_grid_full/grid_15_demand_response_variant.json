@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_15_demand_response_variant",
+  "name": "Demand Response Strategy Variant Selection (Disambiguation)",
+  "description": "Two demand response strategies: direct load control (DLC, certain but intrusive) and price-responsive (PR, uncertain but non-intrusive). Disambiguation UPR selects the reduction CZ based on strategy selection.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Demand Response Configuration",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "DLC Demand Reduction",
+          "symbol": "delta_P_dlc",
+          "unit": "MW",
+          "description": "Demand reduction from direct load control activation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SMARD: direct load control demand response from contracted industrial loads",
+            "min": 38,
+            "max": 48
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "FCR Demand Response Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Demand Response Reduction",
+          "symbol": "delta_P_min",
+          "unit": "MW",
+          "description": "ENTSO-E FCR: minimum demand response for frequency regulation",
+          "fixed_value": 35
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "delta_P = Select{delta_P_dlc, delta_P_pr}[strategy] >= delta_P_min",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(strategy) = Select{CZ_dlc=[43±5], CZ_pr=[43±15]} — both checked against delta_P_min=35 MW",
+      "upr_description": "Disambiguation UPR: demand response strategy selects the reduction CZ; both must satisfy FCR minimum."
+    }
+  ]
+}

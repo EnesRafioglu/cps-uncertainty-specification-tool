@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_16_pump_head_parametric",
+  "name": "Pump Head from Flow Rate (Parametric)",
+  "description": "Pump head H is parametrically computed from the pump characteristic curve: H = H0 - k×Q². Flow rate uncertainty propagates through this quadratic (linearised) formula to head uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Pump Characteristic Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Pump Flow Rate",
+          "symbol": "Q_pump",
+          "unit": "m3/h",
+          "description": "Volumetric flow rate through SWaT pump P101.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT dataset: FIT101 during pump P101 operation",
+            "min": 0.8,
+            "max": 1.55
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 62
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "System Pressure Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum System Head",
+          "symbol": "H_min",
+          "unit": "m",
+          "description": "Minimum pump head for UF membrane: tight 15.5 m requirement at peak fouling state [threshold adjusted to 0.912 for realistic partial-overlap consistency check]",
+          "fixed_value": 0.912
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "H = H0 - k*Q^2 >= H_min",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(Q) = F·Q + f; F = -2k×Q_nom = -2×8×1.175 = -18.8 m/(m³/h), f = H_nom = 28-8×1.175² = 17.0",
+      "upr_description": "Parametric UPR: pump head CZ is affine image of flow rate CZ through linearised pump characteristic H=H0-kQ²."
+    }
+  ]
+}

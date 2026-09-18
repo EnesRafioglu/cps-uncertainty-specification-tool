@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_11_pump_catheter_identity",
+  "name": "Infusion Pump Flow to Catheter Delivery Identity",
+  "description": "Syringe pump volumetric flow rate uncertainty propagates directly (identity UPR) to drug delivery rate at the catheter tip. Flow uncertainty carries unchanged through fixed tubing.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Syringe Pump Model",
+      "type": "ComponentPerformanceModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Pump Volumetric Flow Rate",
+          "symbol": "Q_pump",
+          "unit": "mL/h",
+          "description": "Syringe pump set flow rate including motor and syringe uncertainty.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "IEC 60601-2-24: syringe pump flow rate accuracy ±10% at set rate 5 mL/h",
+            "min": 4.5,
+            "max": 5.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Drug Delivery Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Delivery Rate",
+          "symbol": "Q_max",
+          "unit": "mL/h",
+          "description": "Prescribed rate ×1.10: IEC 60601-2-24 upper accuracy tolerance",
+          "fixed_value": 5.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "Q_catheter = Q_pump <= Q_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(Q_pump) = Q_pump; F=[1], f=0 — delivery rate equals pump flow with no transformation",
+      "upr_description": "Identity UPR: pump flow uncertainty propagates unchanged through fixed tubing to catheter delivery rate."
+    }
+  ]
+}

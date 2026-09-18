@@ -1,0 +1,71 @@
+{
+  "scenario_id": "wind_14_storm_shutdown_guard",
+  "name": "Storm Protection Shutdown Guard",
+  "description": "When wind speed exceeds cut-out threshold (b_cutout=1), the turbine must pitch to feather and reach standstill within 10 minutes. Guarded UPR: shutdown sequence applies only when b_cutout=1.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Turbine Control Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Cut-out Condition Flag",
+          "symbol": "b_cutout",
+          "unit": "dimensionless",
+          "description": "Binary flag: 0=below cut-out wind speed, 1=above cut-out — storm shutdown required.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "IEA 15 MW turbine control system: cut-out condition from hub-height anemometer",
+            "option_0": "normal operation — below 25 m/s cut-out",
+            "option_1": "storm shutdown — above 25 m/s for >10s"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Storm Protection Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Shutdown Duration",
+          "symbol": "t_shutdown",
+          "unit": "min",
+          "description": "IEC 61400-1: turbine must reach standstill within 10 minutes of cut-out trigger",
+          "fixed_value": 10
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_cutout=1 => t_to_standstill <= t_shutdown",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(P_gen) = 0 if b_cutout=1, else P_nominal; guard activates feather-pitch and generator disconnect",
+      "upr_description": "Guarded UPR: storm shutdown sequence applies only when cut-out condition b_cutout=1 is active."
+    }
+  ]
+}

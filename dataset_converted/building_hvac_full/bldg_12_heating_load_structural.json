@@ -1,0 +1,73 @@
+{
+  "scenario_id": "bldg_12_heating_load_structural",
+  "name": "Total Heating Load Structural Composition",
+  "description": "Total zone heating demand is structurally composed from three independent sources: transmission loss, infiltration loss, and ventilation loss. Structural UPR: total CZ is Minkowski sum of three component CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Building Heating Load Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Envelope Transmission Loss",
+          "symbol": "Q_trans",
+          "unit": "W",
+          "description": "Heat loss through walls, roof and floor due to U-value uncertainty.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PLEIAData: transmission loss estimated from outdoor temperature and façade U-value uncertainty",
+            "distribution": "gaussian",
+            "mean": 850,
+            "std": 120
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 58
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "HVAC Heating Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Heating Capacity",
+          "symbol": "Q_heat_max",
+          "unit": "W",
+          "description": "HVAC heating plant sizing for zone (W) — tight budget requiring partial overlap",
+          "fixed_value": 1300
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "Q_heat = Q_trans + Q_infil + Q_vent <= Q_heat_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Qᵢ) = Qᵢ for i=trans,infil,vent; CZ_total = CZ_trans ⊕ CZ_infil ⊕ CZ_vent",
+      "upr_description": "Structural UPR: total heating demand CZ is Minkowski sum of three independent component CZs."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_02_swat_flow_rate",
+  "name": "SWaT Inlet Flow Rate (FIT101)",
+  "description": "Volumetric flow rate into Stage 1 raw water tank via motorized valve MV101. When valve is open, flow should be consistent. Uncertainty from electromagnetic flowmeter noise and pressure fluctuations.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Stage 1 Flow Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Inlet Flow Rate",
+          "symbol": "FIT101",
+          "unit": "m3/h",
+          "description": "Flow rate when MV101 is open. Should be approximately constant during normal inflow. Uncertainty from turbulence and electromagnetic flowmeter resolution (±0.5% of reading at nominal 1.2 m3/h).",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT dataset: FIT101 during normal open-valve operation. Published attack analyses show normal range approximately 0.8–1.55 m3/h. Electromagnetic flowmeter accuracy ±0.5% full scale.",
+            "min": 0.8,
+            "max": 1.55
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Water Treatment Capacity Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Required Inlet Flow",
+          "symbol": "FIT101_min",
+          "unit": "m3/h",
+          "description": "Minimum flow to maintain RO production rate of ~19 L/min (1.14 m3/h target, 0.5 m3/h minimum safety margin)",
+          "fixed_value": 0.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "FIT101 >= FIT101_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(FIT101) = FIT101 if FIT101 >= FIT101_min, else ∅",
+      "upr_description": "The minimum production flow guards the inlet flow rate uncertainty set; flow below 0.5 m³/h starves downstream RO stages."
+    }
+  ]
+}

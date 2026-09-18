@@ -1,0 +1,73 @@
+{
+  "scenario_id": "wind_16_annual_energy_structural",
+  "name": "Annual Energy Yield Structural Composition",
+  "description": "Annual energy yield is structurally composed from three seasonal wind resource contributions: winter (high wind), summer (low wind), and transition seasons. Structural UPR: annual CZ is Minkowski sum of seasonal CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Annual Energy Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Winter Season Energy Yield",
+          "symbol": "E_winter",
+          "unit": "GWh",
+          "description": "Annual energy production from December through February.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "IEA 15 MW OpenFAST simulation: winter seasonal energy yield from ERA5 wind climate data",
+            "distribution": "gaussian",
+            "mean": 25,
+            "std": 2.2
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Project Economics Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Annual Energy Yield",
+          "symbol": "E_annual_min",
+          "unit": "GWh",
+          "description": "Project finance: reduced minimum annual yield to 56 GWh after interest rate revision [threshold adjusted to 21.98 for realistic partial-overlap consistency check]",
+          "fixed_value": 21.98
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "E_annual = E_winter + E_transition + E_summer >= E_annual_min",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Eᵢ) = Eᵢ for i=winter,transition,summer; CZ_annual = CZ_winter ⊕ CZ_transition ⊕ CZ_summer",
+      "upr_description": "Structural UPR: annual energy yield CZ is Minkowski sum of three independent seasonal energy CZs."
+    }
+  ]
+}

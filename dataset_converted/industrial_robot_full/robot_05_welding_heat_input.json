@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_05_welding_heat_input",
+  "name": "Robotic Welding Heat Input",
+  "description": "Heat input per unit length during robotic arc welding. Checks whether material properties are preserved.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Welding Process Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Heat Input per Unit Length",
+          "symbol": "Q_weld",
+          "unit": "kJ/mm",
+          "description": "Thermal energy input during weld pass. Uncertain due to arc voltage and wire feed speed variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Weld parameter monitoring data from 200 test welds",
+            "min": 0.48,
+            "max": 0.72
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Material Specification Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Heat Input per Specification",
+          "symbol": "Q_max",
+          "unit": "kJ/mm",
+          "description": "Welding procedure specification maximum for S355 structural steel",
+          "fixed_value": 0.65
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "(U_arc * I_arc) / (v_travel * 1000) <= Q_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(U, I) = (U · I) / (v · 1000); F scales voltage and current uncertainty into heat input domain",
+      "upr_description": "Heat input per unit length is an affine function of arc voltage and current: Q = (U·I)/(v·1000) kJ/mm. This parametric mapping propagates the joint uncertainty in voltage and current through the welding physics formula into the heat input domain, where it is compared against the WPS maximum."
+    }
+  ]
+}

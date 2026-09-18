@@ -1,0 +1,73 @@
+{
+  "scenario_id": "auto_07_lidar_quality",
+  "name": "LiDAR Sensor Quality",
+  "description": "Measurement quality of the LiDAR sensor under environmental disturbances. Checks whether perception requirements are met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Sensor Performance Model",
+      "type": "SensorPerformanceModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "LiDAR Measurement Quality",
+          "symbol": "q_lidar",
+          "unit": "",
+          "description": "Quality metric of LiDAR output. Affected by weather, reflections, and sensor noise.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Field test measurements",
+            "distribution": "gaussian",
+            "mean": 0.92,
+            "std": 0.03
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Perception Requirement Model",
+      "type": "PerceptionRequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Acceptable Sensor Quality",
+          "symbol": "q_min",
+          "unit": "",
+          "description": "Threshold below which perception algorithms fail",
+          "fixed_value": 0.9
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "q_lidar >= q_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(q_lidar) = q_lidar if q_lidar >= q_min, else ∅",
+      "upr_description": "The perception quality threshold q_min = 0.90 acts as the guard. The LiDAR quality uncertainty set is intersected with the half-space above the minimum acceptable value."
+    }
+  ]
+}

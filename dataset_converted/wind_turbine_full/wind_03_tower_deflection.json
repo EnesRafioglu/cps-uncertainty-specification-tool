@@ -1,0 +1,72 @@
+{
+  "scenario_id": "wind_03_tower_deflection",
+  "name": "Tower Top Deflection",
+  "description": "Maximum lateral deflection of the tower under extreme wind loads. Checks structural integrity.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Structural FEM Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Tower Top Lateral Deflection",
+          "symbol": "u_tower",
+          "unit": "m",
+          "description": "Maximum deflection at hub height under 50-year return wind. Uncertain due to soil stiffness and wind load model.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "FEM sensitivity study with soil parameter variation",
+            "min": 0.42,
+            "max": 0.67
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Clearance Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Tower Deflection",
+          "symbol": "u_max",
+          "unit": "m",
+          "description": "Blade-tower clearance constraint from design envelope",
+          "fixed_value": 0.6
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "u_tower <= u_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(u_tower) = u_tower if u_tower <= u_max, else ∅",
+      "upr_description": "The blade-tower clearance constraint guards the deflection uncertainty set; deflections above 0.60 m risk blade-tower collision."
+    }
+  ]
+}

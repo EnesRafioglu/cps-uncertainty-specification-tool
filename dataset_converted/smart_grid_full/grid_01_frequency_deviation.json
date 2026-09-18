@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_01_frequency_deviation",
+  "name": "Grid Frequency Deviation",
+  "description": "Frequency deviation during a generation trip event. Checks whether frequency nadir stays within acceptable limits.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Power System Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Frequency Nadir After Trip",
+          "symbol": "f_nadir",
+          "unit": "Hz",
+          "description": "Minimum grid frequency reached after loss of largest generator. Uncertain due to inertia and load variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "N-1 contingency simulation with load uncertainty",
+            "min": 49.2,
+            "max": 49.7
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Grid Code Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Allowable Frequency",
+          "symbol": "f_min",
+          "unit": "Hz",
+          "description": "ENTSO-E synchronous area frequency limit before automatic load shedding",
+          "fixed_value": 49.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "f_nadir >= f_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(f_nadir) = f_nadir if f_nadir >= f_min, else ∅",
+      "upr_description": "The ENTSO-E under-frequency limit guards the nadir uncertainty set; frequency drops below 49 Hz trigger automatic load shedding."
+    }
+  ]
+}

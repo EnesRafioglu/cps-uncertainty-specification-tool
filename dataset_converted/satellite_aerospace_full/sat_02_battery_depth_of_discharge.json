@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_02_battery_depth_of_discharge",
+  "name": "Battery Depth of Discharge in Eclipse",
+  "description": "Depth of discharge of the satellite battery during the eclipse phase. Checks whether battery lifetime requirements are met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Power Budget Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Maximum Depth of Discharge",
+          "symbol": "DoD_max",
+          "unit": "%",
+          "description": "Worst-case DoD during the longest eclipse. Uncertain due to load variation and battery ageing.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Power budget analysis with load and temperature uncertainty",
+            "min": 28,
+            "max": 42
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Battery Life Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum DoD for Design Lifetime",
+          "symbol": "DoD_limit",
+          "unit": "%",
+          "description": "Li-ion battery maximum DoD for 15-year cycle life",
+          "fixed_value": 40
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "DoD_max <= DoD_limit",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(DoD) = DoD, σ₂₁(DoD) = DoD; F = [1], f = [0] in both directions",
+      "upr_description": "The depth of discharge is the same physical quantity in both the power budget model (which computes DoD from eclipse loads) and the battery lifetime model (which constrains DoD to preserve cycle life). The bidirectional identity mapping synchronises the uncertainty sets from both models, and consistency requires their intersection — the jointly admissible DoD range — to be non-empty."
+    }
+  ]
+}

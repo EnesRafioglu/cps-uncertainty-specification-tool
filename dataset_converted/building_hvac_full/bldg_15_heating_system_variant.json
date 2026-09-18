@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_15_heating_system_variant",
+  "name": "Heating System Variant Selection (Disambiguation)",
+  "description": "Two heating systems are available: gas boiler (higher temperature, lower efficiency) and heat pump (lower temperature, higher efficiency). Disambiguation UPR selects between two flow temperature uncertainty sets.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Heating Plant Configuration Model",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Boiler Flow Temperature",
+          "symbol": "T_flow_boiler",
+          "unit": "°C",
+          "description": "Flow temperature from gas boiler in boiler-served configuration.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Building commissioning data: gas boiler operating range",
+            "min": 70,
+            "max": 85
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 58
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Distribution System Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Distribution Flow Temperature",
+          "symbol": "T_flow_max",
+          "unit": "°C",
+          "description": "Underfloor heating pipe specification: maximum flow temperature",
+          "fixed_value": 85
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_flow = Select{T_boiler, T_heatpump}[config] <= T_flow_max",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(config) = Select{CZ_boiler=[77.5±7.5], CZ_heatpump=[50±5]} — both checked against T_flow_max=85°C",
+      "upr_description": "Disambiguation UPR: heating plant variant is selected from discrete set; both alternatives must satisfy distribution limit."
+    }
+  ]
+}

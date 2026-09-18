@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_02_axle_load",
+  "name": "Wheel-Rail Contact Axle Load",
+  "description": "Dynamic axle load during curved track negotiation. Checks whether track loading limits are respected.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Vehicle Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Dynamic Axle Load",
+          "symbol": "Q_axle",
+          "unit": "kN",
+          "description": "Dynamic wheel load including centrifugal and curve negotiation effects. Uncertain due to cant deficiency and speed variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Multibody simulation with track geometry variation",
+            "min": 148,
+            "max": 172
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Track Infrastructure Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Permitted Axle Load",
+          "symbol": "Q_max",
+          "unit": "kN",
+          "description": "Infrastructure manager permitted axle load for D4 line category",
+          "fixed_value": 165
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "Q_static + delta_Q_dynamic <= Q_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(Q_axle) = Q_static + ΔQ_dynamic; F = [1 1], f = [0] (sum of static and dynamic increment)",
+      "upr_description": "Dynamic axle load is the affine sum of the static axle load and a dynamic increment caused by track geometry and speed: Q_dyn = Q_static + ΔQ. This parametric mapping aggregates two independent uncertainty contributions into total dynamic load, which must remain below the D4 infrastructure limit of 165 kN."
+    }
+  ]
+}

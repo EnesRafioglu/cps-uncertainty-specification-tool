@@ -1,0 +1,72 @@
+{
+  "scenario_id": "wind_02_nacelle_vibration",
+  "name": "Nacelle Vibration Level",
+  "description": "Mechanical vibration in the nacelle drivetrain. Checks whether vibration amplitude stays within operational limits.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Drivetrain Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Vibration Amplitude",
+          "symbol": "a_vib",
+          "unit": "mm/s",
+          "description": "Peak vibrational velocity in the nacelle. Uncertain due to wind gusts and rotor imbalance.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Field measurement campaign on similar turbines",
+            "min": 2.1,
+            "max": 4.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "O&M Limit Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Vibration Shutdown Threshold",
+          "symbol": "a_max",
+          "unit": "mm/s",
+          "description": "ISO 10816-21 shutdown threshold for wind turbines",
+          "fixed_value": 4.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "a_vib <= a_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(a_vib) = a_vib if a_vib <= a_max, else ∅",
+      "upr_description": "The ISO 10816-21 shutdown threshold guards the vibration amplitude uncertainty set; amplitudes above 4.5 mm/s trigger emergency stop."
+    }
+  ]
+}

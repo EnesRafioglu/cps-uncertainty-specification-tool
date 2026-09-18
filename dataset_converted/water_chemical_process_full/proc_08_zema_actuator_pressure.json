@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_08_zema_actuator_pressure",
+  "name": "ZeMA Electromechanical Cylinder Pressure",
+  "description": "Hydraulic pressure in the drive chamber of an industrial electromechanical cylinder during the return stroke. Uncertainty from sensor noise measured at PTB with calibrated uncertainty data. Checks whether pressure stays within actuator rated range.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "ZeMA Cylinder Physical Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Drive Chamber Pressure",
+          "symbol": "P_cyl",
+          "unit": "bar",
+          "description": "Pressure in the electromechanical cylinder drive chamber during return stroke. Measured by Festo VPPM sensor at 2 kHz. Dataset includes standard uncertainty values (qudt:standardUncertainty) computed by PTB. 6292 return stroke cycles.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ZeMA testbed sensor dataset (Zenodo doi:10.5281/zenodo.3929384, Dorst et al. 2020). Pressure page (page 6) of HDF5 3D-matrix. 6292 cycles at 2 kHz. Standard uncertainty field (qudt:standardUncertainty) provided per measurement. Mean and std derived from return stroke phase across all cycles.",
+            "distribution": "gaussian",
+            "mean": 4.1,
+            "std": 0.35
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 68
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Actuator Specification Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Operating Pressure",
+          "symbol": "P_max",
+          "unit": "bar",
+          "description": "Festo VPPM pressure regulation maximum operating pressure from actuator specification sheet",
+          "fixed_value": 6.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_cyl <= P_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(P_cyl) = P_cyl if P_cyl <= P_max, else ∅",
+      "upr_description": "The rated maximum operating pressure guards the cylinder pressure uncertainty set; pressures above 6.0 bar risk seal failure."
+    }
+  ]
+}

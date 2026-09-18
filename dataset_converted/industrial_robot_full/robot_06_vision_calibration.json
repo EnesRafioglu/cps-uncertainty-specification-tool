@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_06_vision_calibration",
+  "name": "Robot Vision System Calibration Error",
+  "description": "Calibration error of the robot-mounted camera system. Checks whether visual guidance accuracy is sufficient.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Vision Calibration Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Camera-to-Robot Calibration Error",
+          "symbol": "err_cal",
+          "unit": "mm",
+          "description": "Residual hand-eye calibration error. Uncertain due to lens distortion variation and thermal drift.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Calibration repeatability study over 50 cycles",
+            "distribution": "gaussian",
+            "mean": 0.12,
+            "std": 0.04
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Vision-Guided Assembly Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Calibration Error for Guided Assembly",
+          "symbol": "err_cal_max",
+          "unit": "mm",
+          "description": "Maximum error for reliable pin-in-hole insertion with vision guidance",
+          "fixed_value": 0.2
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "err_cal <= err_cal_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(err_cal) = err_cal if err_cal <= err_cal_max, else ∅",
+      "upr_description": "The maximum allowable calibration error guards the hand-eye calibration uncertainty set; residuals above 0.20 mm make vision-guided insertion unreliable."
+    }
+  ]
+}

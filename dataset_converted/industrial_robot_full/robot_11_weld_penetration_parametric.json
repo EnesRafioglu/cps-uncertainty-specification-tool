@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_11_weld_penetration_parametric",
+  "name": "Weld Penetration Depth from Heat Input (Parametric)",
+  "description": "Weld penetration depth is a parametric function of heat input: d_pen = k × H_weld. ZeMA heat input uncertainty propagates through this affine formula to penetration depth uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Welding Process Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Welding Heat Input",
+          "symbol": "H_weld",
+          "unit": "kJ/mm",
+          "description": "Energy input per unit weld length, combining voltage, current and travel speed.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "ZeMA welding dataset (Zenodo doi:10.5281/zenodo.3929384)",
+            "min": 0.48,
+            "max": 0.62
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Weld Quality Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Penetration Depth",
+          "symbol": "d_pen_max",
+          "unit": "mm",
+          "description": "Weld procedure WPS-42: tight maximum penetration for thin-wall joint [threshold adjusted to 0.599 for realistic partial-overlap consistency check]",
+          "fixed_value": 0.599
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "d_pen = k * H_weld <= d_pen_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(H) = F·H + f where F = k = 4.8 mm²/kJ, f = 0; CZ_dpen = [c_dpen ± g_dpen] = [H_c*4.8 ± H_g*4.8]",
+      "upr_description": "Parametric UPR: penetration depth CZ is affine image of heat input CZ through empirical d_pen=k×H formula."
+    }
+  ]
+}

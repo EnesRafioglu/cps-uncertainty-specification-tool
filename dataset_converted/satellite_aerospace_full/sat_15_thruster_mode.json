@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_15_thruster_mode",
+  "name": "Thruster Mode Variant Selection (Disambiguation)",
+  "description": "Two thruster configurations are available: monopropellant (higher thrust, more propellant) and cold gas (lower thrust, minimal mass). Disambiguation UPR selects the appropriate thrust force CZ based on manoeuvre type.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Propulsion System Model",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Monopropellant Thruster Force",
+          "symbol": "F_mono",
+          "unit": "N",
+          "description": "Thrust force of monopropellant thruster for orbit correction manoeuvres.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thruster datasheet: monopropellant thrust at nominal feed pressure",
+            "min": 0.4,
+            "max": 0.8
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Manoeuvre Performance Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Thrust for Attitude Control",
+          "symbol": "F_min",
+          "unit": "N",
+          "description": "Minimum thrust required for attitude disturbance rejection torque",
+          "fixed_value": 0.008
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "F_thrust = Select{F_mono, F_cold}[manoeuvre] >= F_min",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(manoeuvre) = Select{CZ_mono=[0.6±0.2], CZ_cold=[0.03±0.02]} — both checked against F_min=0.008 N",
+      "upr_description": "Disambiguation UPR: thruster mode selected by manoeuvre type; both variants must satisfy minimum attitude control thrust."
+    }
+  ]
+}

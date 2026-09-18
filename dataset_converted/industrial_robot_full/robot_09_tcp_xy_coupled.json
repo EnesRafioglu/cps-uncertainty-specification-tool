@@ -1,0 +1,105 @@
+{
+  "scenario_id": "robot_09_tcp_xy_coupled",
+  "name": "TCP Positioning Error — Coupled X/Y Axes",
+  "description": "TCP X and Y positioning errors share the same kinematic chain from base to flange, so joint backlash and thermal drift affect both axes with a positive correlation.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Robot Kinematic Error Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "TCP X-axis Error",
+          "symbol": "err_x",
+          "unit": "mm",
+          "description": "Positioning error along X. Positively correlated with Y through shared joints.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ISO 9283 measurements on UR5 robot across operating temperatures",
+            "distribution": "gaussian",
+            "mean": 0.0,
+            "std": 0.04
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        },
+        {
+          "id": "e2",
+          "name": "TCP Y-axis Error",
+          "symbol": "err_y",
+          "unit": "mm",
+          "description": "Positioning error along Y. Positively correlated with err_x.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ISO 9283 measurements on UR5 robot across operating temperatures",
+            "distribution": "gaussian",
+            "mean": 0.0,
+            "std": 0.035
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Assembly Tolerance Specification",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Maximum Radial TCP Error",
+          "symbol": "tol_radial",
+          "unit": "mm",
+          "description": "Assembly drawing: √(err_x²+err_y²) ≤ 0.15 mm",
+          "fixed_value": 0.15
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": "<=",
+      "expression": "sqrt(err_x^2 + err_y^2) <= tol_radial",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ([err_x,err_y]) = [err_x,err_y] if ‖[err_x,err_y]‖₂ <= tol_radial, else ∅",
+      "upr_description": "Radial constraint: intersection of 2D CZ with disc of radius 0.15 mm."
+    }
+  ]
+}

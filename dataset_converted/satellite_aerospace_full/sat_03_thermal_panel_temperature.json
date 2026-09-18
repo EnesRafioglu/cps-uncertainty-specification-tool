@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_03_thermal_panel_temperature",
+  "name": "Solar Panel Operating Temperature",
+  "description": "Temperature of the solar array during sunlit orbit phases. Checks whether temperature stays within panel qualification range.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Orbital Thermal Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Solar Panel Peak Temperature",
+          "symbol": "T_panel",
+          "unit": "°C",
+          "description": "Peak equilibrium temperature of the solar array in worst-case orbit. Uncertain due to coating degradation and albedo variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thermal desktop analysis with orbital parameter variation",
+            "min": 68,
+            "max": 92
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Component Qualification Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Solar Panel Qualification Temperature",
+          "symbol": "T_qual",
+          "unit": "°C",
+          "description": "Maximum qualification temperature from component testing",
+          "fixed_value": 90
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_panel <= T_qual",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(T_panel) = T_panel if T_panel <= T_qual, else ∅",
+      "upr_description": "The component qualification temperature guards the solar panel temperature uncertainty set; operation above 90°C risks cell delamination."
+    }
+  ]
+}

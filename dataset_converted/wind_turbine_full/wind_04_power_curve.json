@@ -1,0 +1,73 @@
+{
+  "scenario_id": "wind_04_power_curve",
+  "name": "Power Curve Deviation",
+  "description": "Deviation of actual power output from the certified power curve. Checks whether energy yield meets contractual guarantee.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Aerodynamic Performance Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Power Curve Deviation",
+          "symbol": "delta_P",
+          "unit": "%",
+          "description": "Percentage deviation from certified power curve due to blade surface degradation and wind shear.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Fleet performance data from similar turbine models",
+            "distribution": "gaussian",
+            "mean": -1.5,
+            "std": 2.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Energy Yield Contract Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Power Deficit",
+          "symbol": "delta_P_max",
+          "unit": "%",
+          "description": "Performance guarantee threshold in energy purchase agreement",
+          "fixed_value": -5.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "delta_P >= delta_P_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(δP) = δP if δP >= δP_max, else ∅",
+      "upr_description": "The energy contract penalty floor guards the power curve deviation uncertainty set; deviations worse than −5% trigger financial penalties."
+    }
+  ]
+}

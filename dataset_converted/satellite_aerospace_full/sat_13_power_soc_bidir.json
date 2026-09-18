@@ -1,0 +1,73 @@
+{
+  "scenario_id": "sat_13_power_soc_bidir",
+  "name": "Solar Power and Battery SOC Bidirectional Eclipse Coupling",
+  "description": "Average solar power and post-eclipse battery SOC are bidirectionally coupled through eclipse duration: longer eclipses simultaneously reduce solar power and deplete SOC. Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Orbital Power Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Orbit-Averaged Solar Power",
+          "symbol": "P_solar_avg",
+          "unit": "W",
+          "description": "Average solar power per orbit, reduced by eclipse fraction.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "AcubeSAT power budget simulation: orbit-averaged power across 90-day eclipse duration variation",
+            "distribution": "gaussian",
+            "mean": 18.5,
+            "std": 2.2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Power Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Solar Power for Operations",
+          "symbol": "P_min",
+          "unit": "W",
+          "description": "Minimum orbit-averaged solar power for payload operation",
+          "fixed_value": 14
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "P_solar_avg >= P_min",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(P_solar) = P_solar, σ₂₁(SOC) = f(P_solar, eclipse_duration) — bidirectional coupling through orbital energy balance",
+      "upr_description": "Identity-bidir UPR: solar power and battery SOC are bidirectionally coupled through eclipse duration uncertainty."
+    }
+  ]
+}

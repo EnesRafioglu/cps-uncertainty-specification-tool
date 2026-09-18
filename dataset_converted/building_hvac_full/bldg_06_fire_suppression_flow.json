@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_06_fire_suppression_flow",
+  "name": "Fire Suppression Sprinkler Flow Rate",
+  "description": "Water flow rate from a fire sprinkler head during activation. Checks whether flow meets fire safety standard.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Hydraulic Sprinkler Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Sprinkler Discharge Flow Rate",
+          "symbol": "Q_sprinkler",
+          "unit": "L/min",
+          "description": "Flow rate from a single sprinkler head. Uncertain due to pipe pressure variation and head K-factor tolerances.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Hydraulic calculation with ±10% supply pressure variation",
+            "min": 78,
+            "max": 98
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Fire Safety Standard Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Required Flow Rate",
+          "symbol": "Q_min",
+          "unit": "L/min",
+          "description": "EN 12845 minimum discharge density for OH1 occupancy",
+          "fixed_value": 80
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "Q_sprinkler >= Q_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(Q_sprinkler) = Q_sprinkler if Q_sprinkler >= Q_min, else ∅",
+      "upr_description": "The EN 12845 minimum discharge rate guards the sprinkler flow uncertainty set; only flow rates at or above 80 L/min satisfy the standard."
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "scenario_id": "auto_09_brake_disc_geometry",
+  "name": "Brake Disc Geometry Tolerance",
+  "description": "Outer diameter and rotor thickness of the KaRaceIng brake disc are manufactured in the same CNC turning pass, creating a physical correlation: a deeper cut increases diameter deviation while slightly reducing thickness.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Brake Disc Manufacturing Model",
+      "type": "CADGeometryModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Disc Outer Diameter",
+          "symbol": "d_disc",
+          "unit": "mm",
+          "description": "Outer diameter after CNC turning. Tolerance ±5 mm from 300 mm nominal.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "KaRaceIng manufacturing spec",
+            "min": 295.0,
+            "max": 305.0
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Disc Rotor Thickness",
+          "symbol": "t_disc",
+          "unit": "mm",
+          "description": "Rotor thickness after turning. Tolerance ±1.5 mm from 28 mm nominal. Correlated with d_disc.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "KaRaceIng manufacturing spec",
+            "min": 26.5,
+            "max": 29.5
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Brake System Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Minimum Disc Diameter",
+          "symbol": "d_min",
+          "unit": "mm",
+          "description": "Minimum diameter for required brake torque (KaRaceIng brake spec)",
+          "fixed_value": 297.0
+        },
+        {
+          "id": "e4",
+          "name": "Minimum Rotor Thickness",
+          "symbol": "t_min",
+          "unit": "mm",
+          "description": "Minimum thickness before structural failure risk (FEM analysis)",
+          "fixed_value": 26.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": ">=",
+      "expression": "d_disc >= d_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(d_disc) = d_disc if d_disc >= d_min, else ∅",
+      "upr_description": "Constraint on diameter dimension of the 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": ">=",
+      "expression": "t_disc >= t_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_disc) = t_disc if t_disc >= t_min, else ∅",
+      "upr_description": "Constraint on thickness dimension of the 2D CZ."
+    }
+  ]
+}

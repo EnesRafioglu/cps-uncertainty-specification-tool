@@ -1,0 +1,73 @@
+{
+  "scenario_id": "robot_16_path_deviation_structural",
+  "name": "Path Deviation Structural Composition",
+  "description": "Total TCP path deviation from nominal is structurally composed from three independent sources: kinematic error, vision calibration error, and thermal drift. Structural UPR: total CZ is Minkowski sum of three component CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Path Error Composition Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Kinematic Positioning Error",
+          "symbol": "err_kin",
+          "unit": "mm",
+          "description": "TCP positioning error from joint repeatability alone.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ISO 9283 UR5 positioning repeatability: std across 30 test points",
+            "distribution": "gaussian",
+            "mean": 0,
+            "std": 0.08
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Seam Tracking Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Total Path Deviation",
+          "symbol": "err_total_max",
+          "unit": "mm",
+          "description": "Weld seam tracking: maximum deviation from programmed path",
+          "fixed_value": 0.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "err_total = err_kin + err_vis + err_thermal <= err_total_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(eᵢ) = eᵢ for i=kin,vis,thermal; CZ_total = CZ_kin ⊕ CZ_vis ⊕ CZ_thermal (Minkowski sum)",
+      "upr_description": "Structural UPR: total path deviation CZ is Minkowski sum of three independent error source CZs."
+    }
+  ]
+}

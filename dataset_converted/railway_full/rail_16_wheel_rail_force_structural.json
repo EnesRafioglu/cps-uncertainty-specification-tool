@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_16_wheel_rail_force_structural",
+  "name": "Total Wheel-Rail Contact Force Structural Composition",
+  "description": "Total wheel-rail vertical contact force is structurally composed from static axle load and dynamic impact component. Structural UPR: total CZ is Minkowski sum of static and dynamic CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Wheel-Rail Contact Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Static Axle Load",
+          "symbol": "F_static",
+          "unit": "kN",
+          "description": "Static vertical wheel-rail force from vehicle axle load.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Network Rail weighbridge statistics: static axle load measurement uncertainty",
+            "min": 155,
+            "max": 175
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Track Loading Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Total Contact Force",
+          "symbol": "F_total_max",
+          "unit": "kN",
+          "description": "Track fatigue limit: maximum vertical wheel-rail force for rail life",
+          "fixed_value": 210
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "F_total = F_static + F_dynamic <= F_total_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Fᵢ) = Fᵢ for i=static,dynamic; CZ_total = CZ_static ⊕ CZ_dynamic (Minkowski sum)",
+      "upr_description": "Structural UPR: total contact force CZ is Minkowski sum of static axle load and dynamic impact CZs."
+    }
+  ]
+}

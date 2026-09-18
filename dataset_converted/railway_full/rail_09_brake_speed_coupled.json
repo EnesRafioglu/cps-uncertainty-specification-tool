@@ -1,0 +1,123 @@
+{
+  "scenario_id": "rail_09_brake_speed_coupled",
+  "name": "Braking Distance and Entry Speed — Adhesion Coupling",
+  "description": "Emergency braking distance and residual entry speed at the danger point are coupled through wheel-rail adhesion: low adhesion simultaneously increases braking distance and entry speed.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Train Braking Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Emergency Braking Distance",
+          "symbol": "d_brake",
+          "unit": "m",
+          "description": "Distance to stop from 160 km/h. Adhesion-dependent, correlated with entry speed.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ERA braking tool (ERA/TD/2013-015): Monte Carlo over adhesion distribution",
+            "distribution": "gaussian",
+            "mean": 950.0,
+            "std": 65.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Train Speed at Danger Point",
+          "symbol": "v_entry",
+          "unit": "km/h",
+          "description": "Residual train speed at signal danger point. Positively correlated with d_brake.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ERA braking tool: residual speed distribution at overlap end for N-1 adhesion scenarios",
+            "distribution": "gaussian",
+            "mean": 12.0,
+            "std": 5.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 93
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "ETCS Safety Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Available Overlap Distance",
+          "symbol": "d_avail",
+          "unit": "m",
+          "description": "ETCS overlap distance",
+          "fixed_value": 1000.0
+        },
+        {
+          "id": "e4",
+          "name": "Maximum Entry Speed",
+          "symbol": "v_max",
+          "unit": "km/h",
+          "description": "Train must be stopped before end of overlap",
+          "fixed_value": 0.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": "<=",
+      "expression": "d_brake <= d_avail",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(d_brake) = d_brake if d_brake <= d_avail, else ∅",
+      "upr_description": "Safety constraint on braking distance dimension of 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": "<=",
+      "expression": "v_entry <= v_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(v_entry) = v_entry if v_entry <= v_max, else ∅",
+      "upr_description": "Safety constraint on entry speed dimension of 2D CZ."
+    }
+  ]
+}

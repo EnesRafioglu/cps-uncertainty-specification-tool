@@ -1,0 +1,73 @@
+{
+  "scenario_id": "auto_05_aerodynamic_quality",
+  "name": "Aerodynamic Part Quality",
+  "description": "Geometric deviation of manufactured aerodynamic parts. Checks whether lift coefficient stays above required value.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "CAD Geometry Model",
+      "type": "CADGeometryModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Aerodynamic Profile Deviation",
+          "symbol": "delta_profile",
+          "unit": "mm",
+          "description": "Deviation from nominal CAD geometry due to manufacturing and template wear.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Statistical manufacturing data",
+            "distribution": "gaussian",
+            "mean": 0,
+            "std": 1.2
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Resources",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Aerodynamic Simulation Model",
+      "type": "AerodynamicSimulationModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Required Lift Coefficient",
+          "symbol": "C_L_req",
+          "unit": "",
+          "description": "Lift coefficient at nominal geometry with 1.2mm tolerance",
+          "fixed_value": "C_L(1.2)"
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "C_L_nominal + alpha * delta_profile >= C_L_req",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(δ_profile) = C_L_nominal + α·δ_profile, α ≈ -0.05 per mm deviation",
+      "upr_description": "The lift coefficient is an affine function of the profile deviation: C_L(δ) ≈ C_L₀ + α·δ where α < 0 (deviation reduces lift). This parametric mapping scales the geometric uncertainty set into the aerodynamic performance domain, where it must remain above C_L_req."
+    }
+  ]
+}

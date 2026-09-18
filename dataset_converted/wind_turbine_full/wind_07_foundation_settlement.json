@@ -1,0 +1,73 @@
+{
+  "scenario_id": "wind_07_foundation_settlement",
+  "name": "Foundation Settlement",
+  "description": "Post-installation settlement of the monopile foundation. Checks whether tilt stays within operational tolerance.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Geotechnical Settlement Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Foundation Tilt Angle",
+          "symbol": "theta_settle",
+          "unit": "mrad",
+          "description": "Tilt of the turbine tower after foundation settlement. Uncertain due to soil heterogeneity.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Geotechnical survey and settlement prediction model",
+            "distribution": "gaussian",
+            "mean": 1.8,
+            "std": 0.6
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Structural Integrity Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Tilt",
+          "symbol": "theta_max",
+          "unit": "mrad",
+          "description": "Manufacturer and certification limit for tower verticality",
+          "fixed_value": 3.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "theta_settle <= theta_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(θ_settle) = θ_settle if θ_settle <= θ_max, else ∅",
+      "upr_description": "The certification tilt limit guards the foundation settlement uncertainty set; tilts above 3.0 mrad increase fatigue loads and may void certification."
+    }
+  ]
+}

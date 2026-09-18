@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_07_surgical_robot_force",
+  "name": "Surgical Robot Tool Force",
+  "description": "Contact force applied by a robotic surgical tool on tissue. Checks whether force stays within safe manipulation bounds.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Robot Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Tool Contact Force",
+          "symbol": "F_tool",
+          "unit": "N",
+          "description": "Force at the tool tip during tissue manipulation. Uncertain due to tool wear and tissue stiffness variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Cadaveric tissue manipulation experiments",
+            "min": 0.8,
+            "max": 3.2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 87
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Tissue Safety Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Safe Tool Force",
+          "symbol": "F_max",
+          "unit": "N",
+          "description": "Maximum force before tissue perforation risk, from biomechanical studies",
+          "fixed_value": 3.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "F_tool <= F_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(F_tool) = F_tool if F_tool <= F_max, else ∅",
+      "upr_description": "The biomechanical perforation risk threshold guards the tool force uncertainty set; forces above 3.0 N are excluded."
+    }
+  ]
+}

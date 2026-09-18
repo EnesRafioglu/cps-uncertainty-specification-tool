@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_15_gripper_type",
+  "name": "Gripper Type Variant Selection (Disambiguation)",
+  "description": "Two gripper configurations are available: vacuum cup (lighter, weaker grip) and electromechanical jaw (heavier, stronger grip). Disambiguation UPR selects between two grip force uncertainty sets based on process requirements.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "End Effector Configuration Model",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Vacuum Cup Grip Force",
+          "symbol": "F_grip_vac",
+          "unit": "N",
+          "description": "Maximum grip force of vacuum cup end effector under pressure variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Vacuum cup datasheet: grip force at 0.6–0.8 bar supply pressure",
+            "min": 45,
+            "max": 65
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Grip Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Grip Force",
+          "symbol": "F_grip_min",
+          "unit": "N",
+          "description": "Part mass and acceleration: minimum grip force for reliable pick",
+          "fixed_value": 40
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "F_grip = Select{F_vac, F_jaw}[part_type] >= F_grip_min",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(part_type) = Select{CZ_vac=[55±10], CZ_jaw=[150±30]} — both checked against F_grip_min=40N",
+      "upr_description": "Disambiguation UPR: gripper variant is selected based on part type; both must satisfy minimum grip force."
+    }
+  ]
+}

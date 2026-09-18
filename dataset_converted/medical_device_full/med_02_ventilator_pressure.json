@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_02_ventilator_pressure",
+  "name": "Ventilator Peak Airway Pressure",
+  "description": "Peak inspiratory pressure delivered by a mechanical ventilator. Checks barotrauma safety limit.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Respiratory Mechanics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Airway Pressure",
+          "symbol": "P_peak",
+          "unit": "cmH2O",
+          "description": "Maximum pressure in patient airway during inspiration. Uncertain due to patient lung compliance variation.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Clinical data from 200 ventilated patients",
+            "distribution": "gaussian",
+            "mean": 24.0,
+            "std": 3.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Lung Protection Protocol",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Barotrauma Safety Limit",
+          "symbol": "P_max",
+          "unit": "cmH2O",
+          "description": "ARDS Network lung-protective ventilation protocol limit",
+          "fixed_value": 30
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_peak <= P_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(P_peak) = P_peak if P_peak <= P_max, else ∅",
+      "upr_description": "The ARDS Network 30 cmH₂O limit guards the peak pressure uncertainty set; pressures above this threshold are excluded."
+    }
+  ]
+}

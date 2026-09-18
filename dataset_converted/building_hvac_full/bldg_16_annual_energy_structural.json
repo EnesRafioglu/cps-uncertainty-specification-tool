@@ -1,0 +1,73 @@
+{
+  "scenario_id": "bldg_16_annual_energy_structural",
+  "name": "Annual Heating Energy Demand Structural Composition",
+  "description": "Annual heating energy demand is structurally composed from three seasonal contributions: winter (Oct–Mar), shoulder (Apr, Sep), and summer (May–Aug). Structural UPR: annual CZ is Minkowski sum of seasonal CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Building Energy Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Winter Heating Energy",
+          "symbol": "E_winter",
+          "unit": "MWh",
+          "description": "Heating energy consumption October through March.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "NREL BuildingsBench: winter heating energy for medium office buildings in climate zone 5",
+            "distribution": "gaussian",
+            "mean": 33,
+            "std": 3.5
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Energy Performance Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Annual Heating Energy",
+          "symbol": "E_annual_max",
+          "unit": "MWh",
+          "description": "Building energy performance contract: maximum annual heating energy",
+          "fixed_value": 60
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "E_annual = E_winter + E_shoulder + E_summer <= E_annual_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Eᵢ) = Eᵢ for i=winter,shoulder,summer; CZ_annual = CZ_winter ⊕ CZ_shoulder ⊕ CZ_summer",
+      "upr_description": "Structural UPR: annual heating energy CZ is Minkowski sum of three seasonal component CZs."
+    }
+  ]
+}

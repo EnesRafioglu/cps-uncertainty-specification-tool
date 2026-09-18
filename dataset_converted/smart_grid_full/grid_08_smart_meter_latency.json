@@ -1,0 +1,71 @@
+{
+  "scenario_id": "grid_08_smart_meter_latency",
+  "name": "Smart Meter Data Latency",
+  "description": "Latency of smart meter data reaching the MDMS. Checks whether billing and balancing settlement requirements are met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "AMI Communication Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Meter-to-MDMS Data Latency",
+          "symbol": "t_ami",
+          "unit": "min",
+          "description": "Time for a 15-minute interval reading to reach the meter data management system. Uncertain due to RF mesh network congestion.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "AMI network performance measurements across 10000 meters",
+            "min": 5,
+            "max": 35
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Low",
+            "risk_scale": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Settlement Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Latency for Settlement",
+          "symbol": "t_ami_max",
+          "unit": "min",
+          "description": "Regulatory maximum latency for imbalance settlement data",
+          "fixed_value": 30
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_ami <= t_ami_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(t_ami) = t_ami, σ₂₁(t_ami) = t_ami; same latency measured from both network and MDMS side",
+      "upr_description": "The smart meter data latency is the same quantity whether measured at the RF mesh network side or at the MDMS ingestion side. The bidirectional identity mapping synchronises uncertainty representations from both observation points, and the intersection of both sets determines the jointly consistent latency range that must remain below the 30-minute settlement deadline."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scenario_id": "robot_01_tcp_position",
+  "name": "Tool-Centre-Point Positioning Accuracy",
+  "description": "Absolute positioning accuracy of the robot TCP. Checks whether part placement meets assembly tolerance.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Robot Kinematic Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "TCP Positioning Error",
+          "symbol": "err_tcp",
+          "unit": "mm",
+          "description": "Absolute positioning error at the tool centre point. Uncertain due to joint backlash and thermal expansion.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ISO 9283 repeatability and accuracy measurements",
+            "distribution": "gaussian",
+            "mean": 0.08,
+            "std": 0.03
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Assembly Tolerance Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Assembly Position Tolerance",
+          "symbol": "tol_asm",
+          "unit": "mm",
+          "description": "Part placement tolerance from mechanical assembly drawing",
+          "fixed_value": 0.15
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "err_tcp <= tol_asm",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(err_tcp) = err_tcp if err_tcp <= tol_asm, else ∅",
+      "upr_description": "The assembly tolerance guards the TCP error uncertainty set; only positioning errors within ±0.15 mm remain consistent with the drawing requirement."
+    }
+  ]
+}

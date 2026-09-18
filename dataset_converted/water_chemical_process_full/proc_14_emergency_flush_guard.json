@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_14_emergency_flush_guard",
+  "name": "Emergency Flush Activation Guard",
+  "description": "When the chlorine concentration exceeds the safety threshold (b_over_cl=1), an emergency flush is activated to dilute the water and reduce chlorine. Guarded UPR: flush applies only when b_over_cl=1.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Chemical Safety Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Chlorine Over-Threshold Flag",
+          "symbol": "b_over_cl",
+          "unit": "dimensionless",
+          "description": "Binary flag: 0=chlorine within WHO limit, 1=chlorine exceeds safety threshold.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "SWaT PLC2 chlorine safety interlock: AIT202 > 1.0 mg/L triggers flush",
+            "option_0": "chlorine normal — normal dosing",
+            "option_1": "chlorine exceeded — emergency flush required"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Flush Effectiveness Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Post-Flush Chlorine",
+          "symbol": "C_post_max",
+          "unit": "mg/L",
+          "description": "Post-flush maximum: 30s dilution must reduce concentration below 0.8 mg/L",
+          "fixed_value": 0.8
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_over_cl=1 => C_post = C_pre * exp(-k*t_flush) <= C_post_max",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(C) = C×exp(-k×t_flush) if b_over_cl=1, else C — guard activates dilution decay when over-threshold flag set",
+      "upr_description": "Guarded UPR: emergency flush dilution formula applies only when chlorine over-threshold flag b_over_cl=1."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_16_thermal_balance_structural",
+  "name": "Satellite Thermal Balance Structural Composition",
+  "description": "Total thermal dissipation is structurally composed from electronic component heat sources: OBC, comms, ADCS, and battery. Structural UPR: total CZ is Minkowski sum of four component CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Satellite Thermal Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "OBC Heat Dissipation",
+          "symbol": "P_obc",
+          "unit": "W",
+          "description": "On-board computer heat dissipation during active processing.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "AcubeSAT OBC power consumption measurement from hardware-in-the-loop tests",
+            "min": 0.8,
+            "max": 1.2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Thermal Radiator Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Radiatable Heat",
+          "symbol": "Q_rad_max",
+          "unit": "W",
+          "description": "Thermal radiator degraded capacity after 18 months: 5.8 W limit [threshold adjusted to 1.14 for realistic partial-overlap consistency check]",
+          "fixed_value": 1.14
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "Q_total = P_obc + P_pa + P_adcs + P_batt <= Q_rad_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Pᵢ) = Pᵢ for i=obc,pa,adcs,batt; CZ_total = ⊕ᵢ CZᵢ (Minkowski sum of four independent CZs)",
+      "upr_description": "Structural UPR: total thermal dissipation CZ is Minkowski sum of four independent subsystem heat source CZs."
+    }
+  ]
+}

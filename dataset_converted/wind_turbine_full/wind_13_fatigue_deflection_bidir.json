@@ -1,0 +1,73 @@
+{
+  "scenario_id": "wind_13_fatigue_deflection_bidir",
+  "name": "Blade Fatigue and Tower Deflection Bidirectional Wind Coupling",
+  "description": "Blade fatigue damage and tower fore-aft deflection are bidirectionally coupled through wind turbulence excitation: high turbulence simultaneously drives fatigue accumulation and amplifies deflection. Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Structural Fatigue Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Blade Root Fatigue DEL",
+          "symbol": "DEL_blade",
+          "unit": "kNm",
+          "description": "Damage equivalent load at blade root from 20-year fatigue lifetime.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "IEC 61400-1 OpenFAST: blade root DEL from 100-seed Kaimal turbulence ensemble",
+            "distribution": "gaussian",
+            "mean": 4850,
+            "std": 320
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Structural Certification Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Design Fatigue DEL",
+          "symbol": "DEL_max",
+          "unit": "kNm",
+          "description": "IEC 61400-1 blade fatigue DEL allowable (kNm) — tight budget for GL certification",
+          "fixed_value": 4800
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "DEL_blade <= DEL_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(DEL) = DEL, σ₂₁(u_tower) = f(DEL) — bidirectional coupling through shared wind turbulence excitation",
+      "upr_description": "Identity-bidir UPR: blade fatigue DEL and tower deflection are bidirectionally coupled through shared turbulence excitation."
+    }
+  ]
+}

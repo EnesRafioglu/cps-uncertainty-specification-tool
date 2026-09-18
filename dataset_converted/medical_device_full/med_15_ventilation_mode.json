@@ -1,0 +1,72 @@
+{
+  "scenario_id": "med_15_ventilation_mode",
+  "name": "Ventilation Mode Variant Selection (Disambiguation)",
+  "description": "Two ventilation modes are available: pressure-controlled (PC) and volume-controlled (VC). Each has different peak pressure uncertainty. Disambiguation UPR selects the appropriate CZ based on the clinical decision.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Ventilator Mode Configuration",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "PC-Mode Peak Airway Pressure",
+          "symbol": "P_peak_pc",
+          "unit": "cmH2O",
+          "description": "Peak pressure in pressure-controlled ventilation mode.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "PhysioNet VitalDB: pressure-controlled ventilation P_peak distribution",
+            "min": 22,
+            "max": 28
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Ventilation Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Peak Pressure",
+          "symbol": "P_max",
+          "unit": "cmH2O",
+          "description": "ARDSNet lung-protective ventilation: P_peak ≤ 30 cmH₂O",
+          "fixed_value": 30
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_peak = Select{P_pc, P_vc}[mode] <= P_max",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(mode) = Select{CZ_pc=[25±3], CZ_vc=[25±7]} — both checked against P_max=30 cmH₂O",
+      "upr_description": "Disambiguation UPR: ventilation mode selects the appropriate pressure CZ; both must satisfy ARDSNet limit."
+    }
+  ]
+}

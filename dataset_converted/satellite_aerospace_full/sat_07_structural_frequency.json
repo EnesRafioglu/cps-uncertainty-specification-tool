@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_07_structural_frequency",
+  "name": "Structural First Natural Frequency",
+  "description": "First natural frequency of the satellite structure. Checks whether it is high enough to avoid resonance with the launch vehicle.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Structural FEM Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "First Axial Natural Frequency",
+          "symbol": "f_1",
+          "unit": "Hz",
+          "description": "Lowest axial eigenfrequency of the satellite in launch configuration. Uncertain due to joint stiffness and mass tolerance.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "FEM modal analysis with structural parameter variation",
+            "min": 28.5,
+            "max": 34.0
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 83
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Launch Vehicle Interface Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Required Natural Frequency",
+          "symbol": "f_min",
+          "unit": "Hz",
+          "description": "Ariane 6 user manual minimum payload frequency requirement",
+          "fixed_value": 30.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "f_1 >= f_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(f_1) = f_1 if f_1 >= f_min, else ∅",
+      "upr_description": "The Ariane 6 minimum frequency requirement guards the structural natural frequency uncertainty set; frequencies below 30 Hz risk launch vehicle coupling."
+    }
+  ]
+}

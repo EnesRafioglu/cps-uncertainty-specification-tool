@@ -1,0 +1,71 @@
+{
+  "scenario_id": "grid_05_protection_relay_time",
+  "name": "Protection Relay Operating Time",
+  "description": "Operating time of an overcurrent relay. Checks whether fault clearance is fast enough to maintain transient stability.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Relay Coordination Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Relay Trip Time",
+          "symbol": "t_relay",
+          "unit": "ms",
+          "description": "Time from fault inception to relay contact opening. Uncertain due to current transformer accuracy and relay ageing.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Protection study with CT accuracy class variation",
+            "min": 62,
+            "max": 98
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Stability Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Critical Fault Clearance Time",
+          "symbol": "t_cct",
+          "unit": "ms",
+          "description": "Critical clearance time from transient stability simulation",
+          "fixed_value": 80
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_relay <= t_cct",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_relay) = t_relay if t_relay <= t_cct, else ∅",
+      "upr_description": "The critical clearance time guards the relay operating time uncertainty set; trips slower than 80 ms allow generator pole-slip."
+    }
+  ]
+}

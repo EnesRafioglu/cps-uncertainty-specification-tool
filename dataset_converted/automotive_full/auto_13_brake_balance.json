@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_13_brake_balance",
+  "name": "Front/Rear Brake Balance Bidirectional Coupling",
+  "description": "Front and rear brake bias are bidirectionally coupled through the balance bar: uncertainty in front bias directly implies uncertainty in rear bias (100 − front). Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Brake Balance Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Front Brake Bias",
+          "symbol": "B_front",
+          "unit": "%",
+          "description": "Front axle fraction of total braking torque under temperature and wear uncertainty.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "KaRaceIng brake balance measurement across temperature and pad wear range",
+            "min": 57,
+            "max": 63
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 68
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Brake Stability Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Front Bias for Stability",
+          "symbol": "B_front_max",
+          "unit": "%",
+          "description": "Vehicle dynamics: front bias above 65% causes front lock before rear under trail braking",
+          "fixed_value": 65
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "B_front <= B_front_max",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(B_front) = B_front, σ₂₁(B_rear) = 100 − B_front — bidirectional coupling through balance bar",
+      "upr_description": "Identity-bidir UPR: front and rear bias are bidirectionally linked; uncertainty in one immediately implies uncertainty in the other."
+    }
+  ]
+}

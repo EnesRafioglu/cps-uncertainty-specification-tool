@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_06_reaction_wheel_torque",
+  "name": "Reaction Wheel Torque Margin",
+  "description": "Available torque from the reaction wheel assembly. Checks whether attitude manoeuvres can be completed within time.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Actuator Performance Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Available Reaction Wheel Torque",
+          "symbol": "tau_rw",
+          "unit": "mNm",
+          "description": "Net torque available from the three-wheel assembly at operating temperature. Uncertain due to bearing friction and temperature.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thermal-vacuum test data over temperature range",
+            "min": 18.0,
+            "max": 22.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Manoeuvre Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Torque for Slew Manoeuvre",
+          "symbol": "tau_min",
+          "unit": "mNm",
+          "description": "Required torque to complete 30-degree slew within 5 minutes",
+          "fixed_value": 20.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "tau_rw >= tau_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(τ_rw) = τ_rw if τ_rw >= τ_min, else ∅",
+      "upr_description": "The minimum slew torque requirement guards the reaction wheel torque uncertainty set; torques below 20 mNm cannot complete the required manoeuvre in time."
+    }
+  ]
+}

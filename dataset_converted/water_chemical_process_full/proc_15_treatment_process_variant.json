@@ -1,0 +1,72 @@
+{
+  "scenario_id": "proc_15_treatment_process_variant",
+  "name": "Treatment Process Variant Selection (Disambiguation)",
+  "description": "Two treatment configurations: UF-only (faster, less certain removal) and UF+RO (slower, higher removal). Disambiguation UPR selects the appropriate turbidity CZ based on process configuration.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Treatment Process Configuration",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "UF-only Turbidity Output",
+          "symbol": "NTU_uf",
+          "unit": "NTU",
+          "description": "Treated water turbidity in UF-only operation mode.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "SWaT dataset: turbidity (AIT301) during UF-only operation",
+            "min": 0.08,
+            "max": 0.25
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Water Quality Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Turbidity Limit",
+          "symbol": "NTU_max",
+          "unit": "NTU",
+          "description": "WHO drinking water guideline: maximum turbidity",
+          "fixed_value": 0.3
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "NTU = Select{NTU_uf, NTU_ro}[mode] <= NTU_max",
+      "upr_type": "disambiguation",
+      "upr_sigma": "σ*(mode) = Select{CZ_uf=[0.165±0.085], CZ_ro=[0.03±0.02]} — both checked against NTU_max=0.3",
+      "upr_description": "Disambiguation UPR: treatment mode selects the turbidity CZ; both UF-only and UF+RO must satisfy WHO limit."
+    }
+  ]
+}

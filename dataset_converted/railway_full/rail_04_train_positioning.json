@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_04_train_positioning",
+  "name": "GNSS Train Positioning Error",
+  "description": "Positioning error of the GNSS-based train location system. Checks whether accuracy is sufficient for ETCS level 3 operation.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "GNSS Positioning Model",
+      "type": "SensorPerformanceModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "95th Percentile Positioning Error",
+          "symbol": "err_gnss",
+          "unit": "m",
+          "description": "Horizontal positioning error at 95th percentile including multipath and ionospheric effects.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "GNSS measurement campaign on operational railway",
+            "distribution": "gaussian",
+            "mean": 2.8,
+            "std": 0.9
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "ETCS Safety Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Position Error",
+          "symbol": "err_max",
+          "unit": "m",
+          "description": "ETCS Level 3 maximum positioning error for safe train separation",
+          "fixed_value": 5.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "err_gnss <= err_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(err_gnss) = err_gnss if err_gnss <= err_max, else ∅",
+      "upr_description": "The ETCS L3 positioning error limit guards the GNSS error uncertainty set; errors above 5 m make safe train separation calculations unreliable."
+    }
+  ]
+}

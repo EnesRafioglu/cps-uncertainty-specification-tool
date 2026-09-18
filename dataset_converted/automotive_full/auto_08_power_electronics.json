@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_08_power_electronics",
+  "name": "Power Electronics Efficiency",
+  "description": "Efficiency of the power electronics module. Checks whether sufficient sustained power can be delivered.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Component Performance Model",
+      "type": "ComponentPerformanceModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Power Electronics Efficiency",
+          "symbol": "eta",
+          "unit": "",
+          "description": "Efficiency under realistic operating conditions. Unknown before integrated testing.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Datasheet range and pre-integration estimates",
+            "min": 0.88,
+            "max": 0.95
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 75
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Vehicle Validation Model",
+      "type": "VehicleValidationModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Required Sustained Power",
+          "symbol": "P_req",
+          "unit": "kW",
+          "description": "Minimum sustained power for competitive performance",
+          "fixed_value": 80
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "P_DC_max * eta >= P_req",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(eta) = P_DC_max · eta; F = P_DC_max (≈ 90 kW), f = 0",
+      "upr_description": "Sustained output power is an affine function of efficiency: P_sust = P_DC_max · η. This parametric mapping scales the efficiency uncertainty set by the DC input power constant, projecting it into the power domain where it must exceed P_req = 80 kW."
+    }
+  ]
+}

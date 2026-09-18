@@ -1,0 +1,71 @@
+{
+  "scenario_id": "rail_14_level_crossing_guard",
+  "name": "Level Crossing Barrier Activation Guard",
+  "description": "When the train approach detection flag b_approach=1, the level crossing barrier must lower within 30 s. Guarded UPR: the barrier activation command applies only when b_approach=1.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Level Crossing Detection Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Train Approach Detection Flag",
+          "symbol": "b_approach",
+          "unit": "dimensionless",
+          "description": "Binary flag: 0=no train within 1500m, 1=train approaching level crossing.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "ERA level crossing detection system: track circuit or balise-based approach detection",
+            "option_0": "no train — crossing clear",
+            "option_1": "train approaching — barrier activation required"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Level Crossing Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Barrier Activation Time",
+          "symbol": "t_barrier",
+          "unit": "s",
+          "description": "ERA level crossing technical specification: barrier must lower within 30s of approach detection",
+          "fixed_value": 30
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_approach=1 => t_to_lower <= t_barrier",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(barrier) = lower_command if b_approach=1, else clear — guard activates barrier sequence when approach detected",
+      "upr_description": "Guarded UPR: barrier lowering sequence applies only when train approach flag b_approach=1 is active."
+    }
+  ]
+}

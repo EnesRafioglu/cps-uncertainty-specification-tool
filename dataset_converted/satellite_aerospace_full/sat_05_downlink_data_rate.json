@@ -1,0 +1,72 @@
+{
+  "scenario_id": "sat_05_downlink_data_rate",
+  "name": "Downlink Data Rate",
+  "description": "Achievable data rate from the satellite to the ground station. Checks whether science data volume can be downloaded.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "RF Link Budget Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Achievable Downlink Rate",
+          "symbol": "R_downlink",
+          "unit": "Mbps",
+          "description": "Data rate during a ground station pass. Uncertain due to weather-induced attenuation and pointing loss.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Statistical link budget with weather availability",
+            "distribution": "gaussian",
+            "mean": 28.5,
+            "std": 4.2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Science Data Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Required Downlink Rate",
+          "symbol": "R_min",
+          "unit": "Mbps",
+          "description": "Minimum rate to close the science data budget per orbit",
+          "fixed_value": 20.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "R_nominal + alpha * SNR_margin_dB >= R_min",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(SNR_margin) = B · log2(1 + SNR_nominal · 10^(margin/10)); linearised: R ≈ R_nominal + α · margin_dB",
+      "upr_description": "Achievable data rate is a monotone function of the RF link margin, which itself is uncertain due to weather attenuation and pointing loss. A linearised parametric mapping propagates the link margin uncertainty through the Shannon capacity formula into the data rate domain, where it must exceed R_min = 20 Mbps."
+    }
+  ]
+}

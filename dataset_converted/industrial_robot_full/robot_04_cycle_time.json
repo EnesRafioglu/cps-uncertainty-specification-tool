@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_04_cycle_time",
+  "name": "Robot Cell Cycle Time",
+  "description": "Actual cycle time of a robotic assembly cell. Checks whether production throughput target is met.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Cell Simulation Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Actual Cycle Time",
+          "symbol": "t_cycle",
+          "unit": "s",
+          "description": "Total time per part including robot motion, gripper actuation, and conveyor feed. Uncertain due to part variation and gripper timing.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Discrete-event simulation with timing tolerance",
+            "min": 14.2,
+            "max": 17.8
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Production Planning Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowed Cycle Time",
+          "symbol": "t_takt",
+          "unit": "s",
+          "description": "Takt time derived from production volume target",
+          "fixed_value": 16
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_cycle <= t_takt",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_cycle) = t_cycle if t_cycle <= t_takt, else ∅",
+      "upr_description": "The takt time guards the cycle time uncertainty set; only cycle times at or below 16 s are consistent with the production plan."
+    }
+  ]
+}

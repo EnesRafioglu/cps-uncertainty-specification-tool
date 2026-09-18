@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_06_tep_separator_pressure",
+  "name": "Tennessee Eastman Separator Pressure (XMEAS08)",
+  "description": "Product separator pressure in the Tennessee Eastman process. High separator pressure indicates control failure or feed composition upset. Checks whether pressure remains in operating band.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "TEP Separator Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Separator Pressure",
+          "symbol": "XMEAS08",
+          "unit": "kPa",
+          "description": "Product separator vessel pressure. Controlled by condenser coolant flow. Statistics from fault-free TEP dataset column 8 (XMEAS(8) in Downs-Vogel notation).",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "TEP fault-free dataset (Rieth et al. 2017, Harvard Dataverse). XMEAS08 column from d00.dat training set. Near-Gaussian with low variance under normal control. Fault IDV(4) causes step change in separator level (related variable) demonstrating sensitivity.",
+            "distribution": "gaussian",
+            "mean": 50.1,
+            "std": 0.61
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "TEP Separator Safety Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Separator Pressure",
+          "symbol": "XMEAS08_max",
+          "unit": "kPa",
+          "description": "Upper pressure limit for separator vessel from TEP process description (Downs & Vogel 1993).",
+          "fixed_value": 52.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "XMEAS08 <= XMEAS08_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(XMEAS08) = XMEAS08 if XMEAS08 <= XMEAS08_max, else ∅",
+      "upr_description": "The vessel pressure limit guards the separator pressure uncertainty set; pressures above 52.5 kPa trigger the high-pressure shutdown."
+    }
+  ]
+}

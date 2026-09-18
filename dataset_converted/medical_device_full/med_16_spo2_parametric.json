@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_16_spo2_parametric",
+  "name": "SpO2 from Haemoglobin Saturation (Parametric)",
+  "description": "Pulse oximeter SpO2 reading is a parametric function of true haemoglobin oxygen saturation: SpO2 = a × SaO2 + b (Beer-Lambert approximation). Haemoglobin saturation uncertainty propagates parametrically to SpO2.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Pulse Oximeter Calibration Model",
+      "type": "SensorPerformanceModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "True Haemoglobin Saturation",
+          "symbol": "SaO2",
+          "unit": "%",
+          "description": "True arterial haemoglobin oxygen saturation from co-oximetry.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PhysioNet VitalDB: co-oximetry SaO2 values from ICU arterial blood gas measurements",
+            "distribution": "gaussian",
+            "mean": 95.2,
+            "std": 2.1
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Oxygenation Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum SpO2 Alert Threshold",
+          "symbol": "SpO2_min",
+          "unit": "%",
+          "description": "WHO hypoxia alert: SpO2 below 94% requires clinical intervention",
+          "fixed_value": 94
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "SpO2 = 0.98 * SaO2 + 1.5 >= SpO2_min",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(SaO2) = F·SaO2 + f; F=0.98, f=1.5 — parametric Beer-Lambert calibration maps SaO2 CZ to SpO2 CZ",
+      "upr_description": "Parametric UPR: SpO2 CZ is affine image of haemoglobin saturation CZ through oximeter calibration formula."
+    }
+  ]
+}

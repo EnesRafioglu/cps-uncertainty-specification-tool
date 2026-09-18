@@ -1,0 +1,123 @@
+{
+  "scenario_id": "sat_09_power_soc_coupled",
+  "name": "Solar Panel Power and Battery SOC — Eclipse Coupling",
+  "description": "Average solar power and post-eclipse battery SOC are coupled through eclipse duration: longer eclipses simultaneously reduce solar power and deplete the battery, creating a positive correlation.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Satellite Power Budget Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Average Solar Panel Power",
+          "symbol": "P_solar",
+          "unit": "W",
+          "description": "Time-averaged solar power per orbit. Coupled with SOC through eclipse duration.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "AcubeSAT ADCS simulation: power budget over 3 months of orbit predictions",
+            "distribution": "gaussian",
+            "mean": 18.5,
+            "std": 2.2
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Post-Eclipse Battery SOC",
+          "symbol": "SOC_post",
+          "unit": "%",
+          "description": "Battery SOC at end of eclipse. Positively correlated with P_solar.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "NASA battery dataset (PCOE) + eclipse depth variation from GMAT orbit propagation",
+            "distribution": "gaussian",
+            "mean": 32.0,
+            "std": 6.0
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Satellite Power Safety Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Minimum Solar Power",
+          "symbol": "P_min",
+          "unit": "W",
+          "description": "Minimum average solar power to sustain payload operations",
+          "fixed_value": 14.0
+        },
+        {
+          "id": "e4",
+          "name": "Minimum Battery SOC",
+          "symbol": "SOC_min",
+          "unit": "%",
+          "description": "Minimum SOC to survive next eclipse without load shedding",
+          "fixed_value": 20.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": ">=",
+      "expression": "P_solar >= P_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(P_solar) = P_solar if P_solar >= P_min, else ∅",
+      "upr_description": "Power constraint on solar power dimension of 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": ">=",
+      "expression": "SOC_post >= SOC_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(SOC_post) = SOC_post if SOC_post >= SOC_min, else ∅",
+      "upr_description": "SOC constraint on battery dimension of 2D CZ."
+    }
+  ]
+}

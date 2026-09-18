@@ -1,0 +1,71 @@
+{
+  "scenario_id": "auto_06_software_migration",
+  "name": "Software Architecture Migration",
+  "description": "Binary decision on whether the CarPC/MCU software migration can be completed. Checks architectural consistency.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Software Architecture Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Migration Decision",
+          "symbol": "b_migration",
+          "unit": "",
+          "description": "Whether migration to unified architecture is completed within the project timeline.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "Development team assessment",
+            "option_0": "Legacy architecture remains",
+            "option_1": "Merged architecture implemented"
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Belief Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Resources",
+            "pattern_type": "Persistent",
+            "perspective_type": "Subjective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "2nd Level",
+            "risk_type": "Medium",
+            "risk_scale": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "System Configuration Model",
+      "type": "SystemConfigurationModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Active System Architecture",
+          "symbol": "a_system",
+          "unit": "",
+          "description": "Target merged architecture configuration",
+          "fixed_value": "a_merged"
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "",
+      "expression": "b_migration = 1 => a_system = a_merged",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(b_migration) = a_merged if b_migration = 1, else identity (legacy config retained)",
+      "upr_description": "The Boolean migration decision acts as a guard. If b_migration = 1 the transformation maps to the merged architecture target; if 0, the legacy configuration persists unchanged. Consistency requires that if the guard fires, the resulting system state equals a_merged."
+    }
+  ]
+}

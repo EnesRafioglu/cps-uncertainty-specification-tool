@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_12_drivetrain_loss",
+  "name": "Total Drivetrain Loss Structural Composition",
+  "description": "Total drivetrain power loss is structurally composed from motor iron loss, gearbox friction loss, and differential bearing loss — three independent uncertainty sources summed.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Drivetrain Loss Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Motor Iron Loss",
+          "symbol": "P_iron",
+          "unit": "W",
+          "description": "Hysteresis and eddy current losses in motor stator at operating speed.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "KaRaceIng motor iron loss measurement from back-EMF tests",
+            "min": 22,
+            "max": 30
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Efficiency Budget Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Total Drivetrain Loss",
+          "symbol": "P_loss_max",
+          "unit": "W",
+          "description": "Tight energy budget: maximum allowable drivetrain losses for endurance event",
+          "fixed_value": 32
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_loss_total = P_iron + P_gear + P_diff <= P_loss_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(P_i) = P_i for i=iron,gear,diff; CZ_total = CZ_iron ⊕ CZ_gear ⊕ CZ_diff (Minkowski sum)",
+      "upr_description": "Structural UPR: total drivetrain loss CZ is Minkowski sum of three independent loss component CZs."
+    }
+  ]
+}

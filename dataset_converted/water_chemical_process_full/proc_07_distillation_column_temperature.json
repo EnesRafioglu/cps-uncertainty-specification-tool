@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_07_distillation_column_temperature",
+  "name": "Batch Distillation Column Temperature (TC_top)",
+  "description": "Top-of-column temperature in a laboratory-scale batch distillation plant. Governs separation quality and product purity. Checks whether temperature stays within expected distillation band.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Batch Distillation Physical Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Column Top Temperature",
+          "symbol": "TC_top",
+          "unit": "°C",
+          "description": "Temperature at top of distillation column during normal ethanol-water separation. Dataset includes explicit measurement uncertainty estimates from calibrated thermocouples. 119 experiments across operating conditions.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "Batch Distillation Dataset for ML Anomaly Detection (Zenodo doi:10.5281/zenodo.17395544, Specht et al. 2025). Fault-free ethanol-water experiments. Measurement uncertainty estimates included in dataset. Top temperature oscillates near ethanol boiling point (78.37°C at 1 atm) with 1.8°C std from reflux ratio variation.",
+            "distribution": "gaussian",
+            "mean": 78.3,
+            "std": 1.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Product Purity Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Top Temperature for Ethanol Purity",
+          "symbol": "TC_top_max",
+          "unit": "°C",
+          "description": "Above 81.5°C indicates water breakthrough at column top, degrading product purity below 90% ethanol (azeotrope at 78.1°C at 1 atm; water boils at 100°C)",
+          "fixed_value": 81.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "TC_top <= TC_top_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(TC_top) = TC_top if TC_top <= TC_top_max, else ∅",
+      "upr_description": "The water breakthrough temperature guards the column top temperature uncertainty set; temperatures above 81.5 °C indicate product purity degradation."
+    }
+  ]
+}

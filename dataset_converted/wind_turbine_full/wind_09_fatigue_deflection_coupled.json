@@ -1,0 +1,123 @@
+{
+  "scenario_id": "wind_09_fatigue_deflection_coupled",
+  "name": "Blade Fatigue Life and Tower Deflection — Wind Load Coupling",
+  "description": "Blade fatigue load cycles and tower deflection are both driven by wind turbulence, creating a positive correlation: high-turbulence events simultaneously reduce fatigue life and increase tower deflection.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Wind Turbine Structural Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Blade Fatigue Life",
+          "symbol": "N_fatigue",
+          "unit": "cycles",
+          "description": "Fatigue life at blade root. Positively correlated with tower deflection through wind load.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "IEC 61400-1 aeroelastic simulation: OpenFAST with Kaimal turbulence, 100 seeds",
+            "distribution": "gaussian",
+            "mean": 2500000,
+            "std": 180000
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 87
+          }
+        },
+        {
+          "id": "e2",
+          "name": "Tower Maximum Deflection",
+          "symbol": "u_tower",
+          "unit": "m",
+          "description": "Max fore-aft tower top deflection. Positively correlated with blade fatigue.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "FEM sensitivity analysis with soil-foundation parameter variation (IEC 61400-1 DLC 1.3)",
+            "distribution": "gaussian",
+            "mean": 0.54,
+            "std": 0.06
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Wind Turbine Certification Requirements",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e3",
+          "name": "Minimum Design Fatigue Life",
+          "symbol": "N_min",
+          "unit": "cycles",
+          "description": "IEC 61400-1: minimum fatigue life for 20-year design lifetime",
+          "fixed_value": 2000000
+        },
+        {
+          "id": "e4",
+          "name": "Maximum Tower Deflection",
+          "symbol": "u_max",
+          "unit": "m",
+          "description": "Blade-tower clearance: deflection above 0.60 m risks collision",
+          "fixed_value": 0.6
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_3",
+      "from_element_id": "e1",
+      "to_element_id": "e3",
+      "operator": ">=",
+      "expression": "N_fatigue >= N_min",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(N_fatigue) = N_fatigue if N_fatigue >= N_min, else ∅",
+      "upr_description": "Certification constraint on fatigue dimension of 2D CZ."
+    },
+    {
+      "id": "CR2_4",
+      "from_element_id": "e2",
+      "to_element_id": "e4",
+      "operator": "<=",
+      "expression": "u_tower <= u_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(u_tower) = u_tower if u_tower <= u_max, else ∅",
+      "upr_description": "Structural constraint on deflection dimension of 2D CZ."
+    }
+  ]
+}

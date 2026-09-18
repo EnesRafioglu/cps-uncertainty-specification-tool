@@ -1,0 +1,72 @@
+{
+  "scenario_id": "wind_06_gearbox_oil_temp",
+  "name": "Gearbox Oil Temperature",
+  "description": "Oil temperature in the gearbox under continuous operation. Checks whether lubrication remains effective.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Thermal Lubrication Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Gearbox Oil Temperature",
+          "symbol": "T_oil",
+          "unit": "°C",
+          "description": "Steady-state oil temperature at rated power. Uncertain due to ambient temperature and cooling system performance.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thermal simulation with ambient temperature range",
+            "min": 62,
+            "max": 78
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 68
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Lubrication Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Oil Temperature",
+          "symbol": "T_oil_max",
+          "unit": "°C",
+          "description": "Gearbox manufacturer lubrication effectiveness limit",
+          "fixed_value": 75
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_oil <= T_oil_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(T_oil) = T_oil if T_oil <= T_oil_max, else ∅",
+      "upr_description": "The lubrication effectiveness limit guards the oil temperature uncertainty set; temperatures above 75 °C degrade viscosity and accelerate wear."
+    }
+  ]
+}

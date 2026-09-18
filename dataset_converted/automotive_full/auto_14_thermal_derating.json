@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_14_thermal_derating",
+  "name": "Thermal Derating Guard Activation",
+  "description": "When motor temperature exceeds 95 °C the inverter activates thermal derating, switching from full-torque to reduced-torque mode. Guarded UPR: the power reduction formula applies only when the guard condition b_derate=1 is active.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Motor Thermal Guard Model",
+      "type": "SoftwareArchitectureModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Thermal Derating Flag",
+          "symbol": "b_derate",
+          "unit": "dimensionless",
+          "description": "Binary flag: 0=nominal operation, 1=thermal derating active above 95°C.",
+          "uncertainty": {
+            "type": "binary",
+            "source": "KaRaceIng motor controller firmware threshold",
+            "option_0": "nominal torque (T_motor <= 95°C)",
+            "option_1": "thermal derating active (T_motor > 95°C)"
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Decision Making",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "discrete non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Motor Control Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Derated Torque Configuration",
+          "symbol": "tau_derated",
+          "unit": "Nm",
+          "description": "Derated torque limit: 60% of 220 Nm peak = 132 Nm",
+          "fixed_value": 132
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "b_derate=1 => tau_cmd = 0.6 * tau_nominal <= tau_derated",
+      "upr_type": "guarded",
+      "upr_sigma": "σ(τ) = 0.6·τ if b_derate=1, else τ — guard activates affine derating map when temperature flag set",
+      "upr_description": "Guarded UPR: derating formula σ(τ)=0.6·τ applies only when thermal guard b_derate=1 is active."
+    }
+  ]
+}

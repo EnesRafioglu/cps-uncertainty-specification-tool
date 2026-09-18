@@ -1,0 +1,72 @@
+{
+  "scenario_id": "grid_07_cable_ampacity",
+  "name": "Underground Cable Ampacity",
+  "description": "Current-carrying capacity of an underground cable considering soil thermal resistivity uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Cable Thermal Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Cable Ampacity",
+          "symbol": "I_amp",
+          "unit": "A",
+          "description": "Continuous current rating under actual soil conditions. Uncertain due to soil moisture and thermal resistivity variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "IEC 60287 calculation with soil thermal resistivity range",
+            "min": 385,
+            "max": 445
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Network Planning Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Peak Load Current",
+          "symbol": "I_load",
+          "unit": "A",
+          "description": "Peak current from load flow study including N-1 contingency",
+          "fixed_value": 400
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "I_amp >= I_load",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(I_amp) = I_amp if I_amp >= I_load, else ∅",
+      "upr_description": "The peak N-1 load current guards the cable ampacity uncertainty set; ampacity below 400 A causes thermal overload."
+    }
+  ]
+}

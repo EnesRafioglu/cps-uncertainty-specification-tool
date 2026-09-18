@@ -1,0 +1,73 @@
+{
+  "scenario_id": "robot_10_force_sensor_identity",
+  "name": "Force Sensor to Joint Torque Identity Propagation",
+  "description": "Wrist force sensor measurement uncertainty propagates directly (identity UPR) through the robot Jacobian to joint torque estimation. Uncertainty passes unchanged through a fixed linear map.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Force Sensor Model",
+      "type": "ComponentPerformanceModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Wrist Force Measurement",
+          "symbol": "F_wrist",
+          "unit": "N",
+          "description": "Measured contact force at robot wrist. Subject to sensor noise.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "UR5 force/torque sensor datasheet: measurement noise specification",
+            "distribution": "gaussian",
+            "mean": 0,
+            "std": 0.8
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Joint Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Allowable Torque Estimation Error",
+          "symbol": "tau_err_max",
+          "unit": "Nm",
+          "description": "Control loop: maximum torque estimation error for precision assembly class",
+          "fixed_value": 1.0
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "tau_err = J^T * F_wrist <= tau_err_max",
+      "upr_type": "identity",
+      "upr_sigma": "σ(F_wrist) = F_wrist; F = J^T (fixed Jacobian), f = 0 — identity propagation through deterministic Jacobian",
+      "upr_description": "Identity UPR: force sensor uncertainty propagates unchanged through the fixed robot Jacobian to joint torque."
+    }
+  ]
+}

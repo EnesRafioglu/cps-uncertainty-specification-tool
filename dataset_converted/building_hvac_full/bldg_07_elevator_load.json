@@ -1,0 +1,72 @@
+{
+  "scenario_id": "bldg_07_elevator_load",
+  "name": "Elevator Structural Load",
+  "description": "Load on the elevator guide rail bracket under emergency stop. Checks whether structural capacity is not exceeded.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Elevator Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Guide Rail Bracket Load",
+          "symbol": "F_bracket",
+          "unit": "kN",
+          "description": "Dynamic load during emergency braking. Uncertain due to payload variation and deceleration profile.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Dynamic simulation with payload and deceleration range",
+            "min": 18.5,
+            "max": 26
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 82
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Structural Capacity Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Guide Rail Bracket Capacity",
+          "symbol": "F_bracket_cap",
+          "unit": "kN",
+          "description": "EN 81-20 structural load capacity of the installed bracket",
+          "fixed_value": 25
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "F_bracket <= F_bracket_cap",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(F_bracket) = F_bracket if F_bracket <= F_bracket_cap, else ∅",
+      "upr_description": "The EN 81-20 structural capacity acts as guard; bracket loads above 25 kN are excluded from the consistent set."
+    }
+  ]
+}

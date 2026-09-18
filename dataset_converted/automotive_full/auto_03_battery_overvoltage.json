@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_03_battery_overvoltage",
+  "name": "Battery Overvoltage",
+  "description": "Transient overvoltage during regenerative braking. Checks whether duration stays within safe limits.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Battery Electrical Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Overvoltage Duration",
+          "symbol": "t_ov",
+          "unit": "ms",
+          "description": "Duration of overvoltage event. Uncertain due to variable state-of-charge and temperature.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Experimental measurements during regenerative braking tests",
+            "min": 0.8,
+            "max": 3.5
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Battery Safety Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Permissible Overvoltage Duration",
+          "symbol": "t_max",
+          "unit": "ms",
+          "description": "Safety threshold from battery specifications",
+          "fixed_value": 2
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_ov <= t_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_ov) = t_ov if t_ov <= t_max, else ∅",
+      "upr_description": "The safety constraint t_ov ≤ 2 ms acts as the guard. The uncertainty set of overvoltage durations is intersected with the admissible half-space defined by the bound."
+    }
+  ]
+}

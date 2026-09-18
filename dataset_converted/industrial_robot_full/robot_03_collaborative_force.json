@@ -1,0 +1,72 @@
+{
+  "scenario_id": "robot_03_collaborative_force",
+  "name": "Collaborative Robot Contact Force",
+  "description": "Contact force during unintended human-robot collision in a collaborative workspace. Checks ISO/TS 15066 safety limit.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Collision Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Peak Quasi-Static Contact Force",
+          "symbol": "F_contact",
+          "unit": "N",
+          "description": "Peak clamping force during a quasi-static collision. Uncertain due to robot velocity and contact geometry.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Power-and-force limiting measurements per ISO/TS 15066",
+            "min": 55,
+            "max": 130
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Transient",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Human Safety Limit Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Body Region Pain Threshold Force",
+          "symbol": "F_limit",
+          "unit": "N",
+          "description": "ISO/TS 15066 quasi-static force limit for chest region",
+          "fixed_value": 110
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "F_contact <= F_limit",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(F_contact) = F_contact if F_contact <= F_limit, else ∅",
+      "upr_description": "The ISO/TS 15066 pain threshold guards the contact force uncertainty set; forces above 110 N for the chest region are excluded as unsafe."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "scenario_id": "bldg_08_bms_response_time",
+  "name": "BMS Fault Response Time",
+  "description": "Response time of the Building Management System to a detected fault. Checks whether alarm response meets safety requirements.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "BMS Communication Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Fault-to-Alarm Response Time",
+          "symbol": "t_bms",
+          "unit": "s",
+          "description": "Time from fault detection to operator alarm. Uncertain due to network load and polling cycle variation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "BMS stress-test measurements",
+            "min": 8,
+            "max": 25
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 58
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Safety Management Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Alarm Response Time",
+          "symbol": "t_bms_max",
+          "unit": "s",
+          "description": "Facility management SLA for critical fault alarms",
+          "fixed_value": 20
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_detect + t_network <= t_bms_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(t_bms) = t_detect + t_network; F = [1 1], f = [0] (sum of two independent latency components)",
+      "upr_description": "Total BMS response time is the affine sum of fault detection latency and network delivery latency: t_bms = t_detect + t_network. This parametric mapping aggregates two independent uncertainty sources into the total response time, which must not exceed the 20 s SLA."
+    }
+  ]
+}

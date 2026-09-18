@@ -1,0 +1,71 @@
+{
+  "scenario_id": "wind_08_scada_latency",
+  "name": "SCADA Communication Latency",
+  "description": "Latency of the SCADA control loop between the wind farm controller and individual turbines. Checks real-time control requirements.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Communication Network Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "SCADA Round-Trip Latency",
+          "symbol": "t_scada",
+          "unit": "ms",
+          "description": "Network latency for control commands. Uncertain due to variable network load and weather-induced interference.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Network measurement under varying load conditions",
+            "min": 45,
+            "max": 120
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Behavior Uncertainty",
+            "atomic_component_type": "Cyber",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Inputs",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "Medium",
+            "risk_scale": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Control Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Control Latency",
+          "symbol": "t_scada_max",
+          "unit": "ms",
+          "description": "Real-time control loop requirement for active power regulation",
+          "fixed_value": 100
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "t_scada <= t_scada_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(t_scada) = t_scada if t_scada <= t_scada_max, else ∅",
+      "upr_description": "The active power regulation timing requirement guards the SCADA latency uncertainty set; latencies above 100 ms prevent effective grid frequency support."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "rail_08_switch_heating_power",
+  "name": "Track Switch Heating Power",
+  "description": "Heating power required to keep a switch free of ice at minimum operating temperature. Checks whether installed capacity is sufficient.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Switch Thermal Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Required Switch Heating Power",
+          "symbol": "P_heat",
+          "unit": "W",
+          "description": "Power needed to maintain switch rail temperature above 0°C at design minimum ambient. Uncertain due to wind and precipitation.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thermal simulation with wind and precipitation extremes",
+            "min": 1800,
+            "max": 2600
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Sporadic",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Switch Heating Installation Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Installed Heating Power",
+          "symbol": "P_installed",
+          "unit": "W",
+          "description": "Installed heating element power for this switch type",
+          "fixed_value": 2400
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "P_heat <= P_installed",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(P_heat) = P_heat if P_heat <= P_installed, else ∅",
+      "upr_description": "The installed heater capacity guards the required heating power uncertainty set; required powers above 2400 W exceed the installed capacity."
+    }
+  ]
+}

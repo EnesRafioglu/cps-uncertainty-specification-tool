@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_12_radiation_dose_structural",
+  "name": "Total Radiation Dose Structural Composition",
+  "description": "Total radiation dose delivered to the target volume is structurally composed from three independent uncertainty sources: machine output calibration, patient positioning, and tissue attenuation uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Radiation Therapy Dose Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Machine Output Dose Component",
+          "symbol": "D_machine",
+          "unit": "cGy",
+          "description": "Dose contribution from linac machine output calibration uncertainty.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "TCIA dosimetry QA records: linac output calibration uncertainty at 2%",
+            "distribution": "gaussian",
+            "mean": 200,
+            "std": 4
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Fully Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Electrical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Dose Prescription Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Total Dose",
+          "symbol": "D_max",
+          "unit": "cGy",
+          "description": "Prescription tolerance: prescribed dose 200 cGy × 1.03 — tight 3% tolerance for sensitive target",
+          "fixed_value": 206
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "D_total = D_machine + D_setup + D_tissue <= D_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Dᵢ) = Dᵢ for i=machine,setup,tissue; CZ_total = CZ_machine ⊕ CZ_setup ⊕ CZ_tissue",
+      "upr_description": "Structural UPR: total dose CZ is Minkowski sum of three independent uncertainty source CZs."
+    }
+  ]
+}

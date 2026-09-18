@@ -1,0 +1,73 @@
+{
+  "scenario_id": "rail_12_safe_stopping_structural",
+  "name": "Total Safe Stopping Distance Structural Composition",
+  "description": "Total safe stopping distance is structurally composed from braking distance and positioning error — two independent uncertainty sources. Structural UPR: total CZ is Minkowski sum of two component CZs.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Train Braking Dynamics Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Emergency Braking Distance",
+          "symbol": "d_brake",
+          "unit": "m",
+          "description": "Distance to stop from 160 km/h emergency braking.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ERA braking tool (ERA/TD/2013-015): Monte Carlo over adhesion coefficient distribution",
+            "distribution": "gaussian",
+            "mean": 950,
+            "std": 65
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "ETCS Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Available Overlap Distance",
+          "symbol": "d_avail",
+          "unit": "m",
+          "description": "ETCS overlap distance from end of Movement Authority",
+          "fixed_value": 1000
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "d_safe = d_brake + err_pos <= d_avail",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(dᵢ) = dᵢ for i=brake,pos; CZ_safe = CZ_brake ⊕ CZ_pos (Minkowski sum of independent CZs)",
+      "upr_description": "Structural UPR: safe stopping distance CZ is Minkowski sum of braking distance and positioning error CZs."
+    }
+  ]
+}

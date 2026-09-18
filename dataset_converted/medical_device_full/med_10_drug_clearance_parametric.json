@@ -1,0 +1,73 @@
+{
+  "scenario_id": "med_10_drug_clearance_parametric",
+  "name": "Drug Clearance Rate from Body Weight (Parametric)",
+  "description": "Drug clearance rate CL is parametrically computed from patient body weight: CL = k × BW^0.75 (allometric scaling). Body weight uncertainty propagates through this formula to clearance uncertainty.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Pharmacokinetic Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Patient Body Weight",
+          "symbol": "BW",
+          "unit": "kg",
+          "description": "ICU patient body weight for allometric dose scaling.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "PhysioNet MIMIC-IV: ICU patient body weight distribution",
+            "distribution": "gaussian",
+            "mean": 75,
+            "std": 9
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Therapeutic Window Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Clearance Rate",
+          "symbol": "CL_max",
+          "unit": "L/h",
+          "description": "Vancomycin therapeutic window: maximum clearance for effective concentration",
+          "fixed_value": 6.5
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "CL = 0.048 * BW^0.75 <= CL_max",
+      "upr_type": "parametric",
+      "upr_sigma": "σ(BW) = F·BW + f; F ≈ 0.048×0.75×BW_nom^(−0.25), f = 0.048×BW_nom^0.75(1−0.75) — linearised allometric UPR",
+      "upr_description": "Parametric UPR: clearance CZ is affine image of body weight CZ through linearised allometric scaling formula."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "scenario_id": "wind_12_tower_moment_structural",
+  "name": "Tower Base Moment Structural Composition",
+  "description": "Tower base bending moment is structurally composed from three independent contributions: mean wind thrust moment, turbulence-driven dynamic amplification, and wave loading (for offshore). Structural UPR: total CZ is Minkowski sum.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Structural Load Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Mean Wind Thrust Moment",
+          "symbol": "M_thrust",
+          "unit": "MNm",
+          "description": "Tower base moment from mean wind thrust force at hub height.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "IEC 61400-1 OpenFAST DLC 1.1: mean thrust moment from 100-seed ensemble",
+            "min": 85,
+            "max": 115
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Structural Certification Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Design Tower Moment",
+          "symbol": "M_max",
+          "unit": "MNm",
+          "description": "IEC 61400-1 DLC 1.1: tower base ultimate moment design limit",
+          "fixed_value": 180
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "M_total = M_thrust + M_turb + M_wave <= M_max",
+      "upr_type": "structural",
+      "upr_sigma": "σᵢ(Mᵢ) = Mᵢ for i=thrust,turb,wave; CZ_total = CZ_thrust ⊕ CZ_turb ⊕ CZ_wave (Minkowski sum)",
+      "upr_description": "Structural UPR: total tower base moment CZ is Minkowski sum of three independent load component CZs."
+    }
+  ]
+}

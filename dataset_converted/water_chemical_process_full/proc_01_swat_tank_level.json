@@ -1,0 +1,73 @@
+{
+  "scenario_id": "proc_01_swat_tank_level",
+  "name": "SWaT Raw Water Tank Level (LIT101)",
+  "description": "Water level in the SWaT Stage 1 raw water tank T101. PLC1 pumps out when level drops below 250 mm and stops at 800 mm. Uncertainty comes from sensor noise and hydraulic dynamics during pump switching. Checks whether level stays within safe operating band.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "SWaT Stage 1 Physical Process Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Tank T101 Water Level",
+          "symbol": "LIT101",
+          "unit": "mm",
+          "description": "Level indicator measurement during normal operation. Oscillates between PLC low (250 mm) and high (800 mm) setpoints with sensor noise and hydraulic lag. Statistics derived from published SWaT normal-operation data (7-day run, 496800 records at 1 Hz).",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "SWaT dataset normal operation (itrust.sutd.edu.sg): LIT101 cycles between 250–800 mm; mean ≈ 525 mm from midpoint of PLC setpoints, std ≈ 148 mm from published histogram analyses in anomaly detection literature.",
+            "distribution": "gaussian",
+            "mean": 525,
+            "std": 148
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "PLC Safety Limit Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Safe Tank Level",
+          "symbol": "LIT101_max",
+          "unit": "mm",
+          "description": "Tank overflow threshold: SWaT testbed design limit from SWaT paper (Goh et al., CRITIS 2016)",
+          "fixed_value": 1000
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "LIT101 <= LIT101_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(LIT101) = LIT101 if LIT101 <= LIT101_max, else ∅",
+      "upr_description": "The overflow threshold of 1000 mm guards the tank level uncertainty set; levels above this cause physical overflow of the raw water tank."
+    }
+  ]
+}

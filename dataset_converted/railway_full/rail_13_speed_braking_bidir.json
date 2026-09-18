@@ -1,0 +1,73 @@
+{
+  "scenario_id": "rail_13_speed_braking_bidir",
+  "name": "Entry Speed and Braking Distance Bidirectional Coupling",
+  "description": "Train entry speed and braking distance are bidirectionally coupled through wheel-rail adhesion: higher speed requires longer braking distance, and adhesion uncertainty affects both simultaneously. Identity-bidir UPR.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Train Braking Adhesion Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Wheel-Rail Adhesion Coefficient",
+          "symbol": "mu_wr",
+          "unit": "dimensionless",
+          "description": "Wheel-rail adhesion coefficient under wet/contaminated rail conditions.",
+          "uncertainty": {
+            "type": "probabilistic",
+            "source": "ERA/TD/2013-015: adhesion coefficient distribution for wet rail conditions",
+            "distribution": "gaussian",
+            "mean": 0.12,
+            "std": 0.03
+          },
+          "classification": {
+            "development_phase": "Run-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Aleatory",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Mechanical",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Environment",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous probabilistic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "ETCS Safety Requirement",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Minimum Required Adhesion",
+          "symbol": "mu_min",
+          "unit": "dimensionless",
+          "description": "ERA: minimum adhesion coefficient for guaranteed braking performance",
+          "fixed_value": 0.07
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": ">=",
+      "expression": "mu_wr >= mu_min",
+      "upr_type": "identity_bidir",
+      "upr_sigma": "σ₁₂(μ) = μ, σ₂₁(d_brake) = f(μ) — bidirectional: adhesion drives both braking distance and entry speed",
+      "upr_description": "Identity-bidir UPR: adhesion coefficient uncertainty bidirectionally drives both braking distance and entry speed."
+    }
+  ]
+}

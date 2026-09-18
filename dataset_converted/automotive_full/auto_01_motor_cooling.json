@@ -1,0 +1,72 @@
+{
+  "scenario_id": "auto_01_motor_cooling",
+  "name": "Motor Cooling",
+  "description": "Thermal analysis of the electric motor. Checks whether predicted operating temperature stays within the safety threshold.",
+  "models": [
+    {
+      "id": "M1",
+      "name": "Thermal Simulation Model",
+      "type": "SimulationModel",
+      "elements": [
+        {
+          "id": "e1",
+          "name": "Motor Operating Temperature",
+          "symbol": "T_motor",
+          "unit": "°C",
+          "description": "Operating temperature of the motor under load. Uncertain due to variable driving conditions and cooling efficiency.",
+          "uncertainty": {
+            "type": "interval",
+            "source": "Thermal analysis and early experimental data",
+            "min": 102,
+            "max": 118
+          },
+          "classification": {
+            "development_phase": "Design-Time Level",
+            "reducibility_level": "Partially Reducible",
+            "nature": "Epistemic",
+            "kind": "Measurement Uncertainty",
+            "atomic_component_type": "Physical",
+            "physical_component_type": "Thermal",
+            "composite_type": "Cyber-Physical",
+            "autonomy_type": "Non-Autonomous",
+            "location_type": "Parameter",
+            "source_type": "Managed System Uncertainty",
+            "pattern_type": "Persistent",
+            "perspective_type": "Objective",
+            "effect_type": "continuous non-deterministic",
+            "level_type": "1st Level",
+            "risk_type": "High",
+            "risk_scale": 75
+          }
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Requirement Model",
+      "type": "RequirementModel",
+      "elements": [
+        {
+          "id": "e2",
+          "name": "Maximum Permissible Motor Temperature",
+          "symbol": "T_max",
+          "unit": "°C",
+          "description": "Motor design and safety constraint threshold",
+          "fixed_value": 110
+        }
+      ]
+    }
+  ],
+  "consistency_relations": [
+    {
+      "id": "CR1_2",
+      "from_element_id": "e1",
+      "to_element_id": "e2",
+      "operator": "<=",
+      "expression": "T_motor <= T_max",
+      "upr_type": "constraint_based",
+      "upr_sigma": "σ(T_motor) = T_motor if T_motor <= T_max, else ∅",
+      "upr_description": "The constraint T_motor ≤ T_max acts as a guard. The propagation is active (returns the value) only when the safety bound is respected; otherwise the intersection is empty, signalling inconsistency."
+    }
+  ]
+}
